@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -18,6 +18,22 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+  --color-admin-cream: var(--admin-cream);
+  --color-admin-surface: var(--admin-surface);
+  --color-admin-ink: var(--admin-ink);
+  --color-admin-espresso: var(--admin-espresso);
+  --color-admin-ai: var(--admin-ai);
+  --color-admin-success: var(--admin-success);
+  --color-admin-warning: var(--admin-warning);
+  --color-admin-danger: var(--admin-danger);
+  --color-admin-muted: var(--admin-muted);
+  --color-admin-muted-strong: var(--admin-muted-strong);
+  --color-admin-line: var(--admin-line);
+  --color-admin-line-soft: var(--admin-line-soft);
+  --color-admin-black: var(--admin-black);
+  --color-admin-black-soft: var(--admin-black-soft);
+  --color-admin-black-line: var(--admin-black-line);
+  --color-admin-black-text: var(--admin-black-text);
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
@@ -81,6 +97,22 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --admin-cream: #f1e9dc;
+  --admin-surface: #faf6ee;
+  --admin-ink: #1e1611;
+  --admin-espresso: #4a2f1e;
+  --admin-ai: #a8571f;
+  --admin-success: #5e7c3d;
+  --admin-warning: #a67c2e;
+  --admin-danger: #a83f2e;
+  --admin-muted: #948066;
+  --admin-muted-strong: #5c4a3a;
+  --admin-line: #d9cbb4;
+  --admin-line-soft: #ede3d2;
+  --admin-black: #000000;
+  --admin-black-soft: #0a0a0a;
+  --admin-black-line: #262626;
+  --admin-black-text: #8c8272;
 }
 
 .dark {
@@ -115,6 +147,27 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+.admin-theme {
+  --background: var(--admin-cream);
+  --foreground: var(--admin-ink);
+  --card: var(--admin-surface);
+  --card-foreground: var(--admin-ink);
+  --popover: var(--admin-surface);
+  --popover-foreground: var(--admin-ink);
+  --primary: var(--admin-ink);
+  --primary-foreground: var(--admin-surface);
+  --secondary: var(--admin-line-soft);
+  --secondary-foreground: var(--admin-ink);
+  --muted: var(--admin-line-soft);
+  --muted-foreground: var(--admin-muted-strong);
+  --accent: var(--admin-line-soft);
+  --accent-foreground: var(--admin-ink);
+  --destructive: var(--admin-danger);
+  --border: var(--admin-line);
+  --input: var(--admin-line);
+  --ring: var(--admin-espresso);
 }
 
 @layer base {

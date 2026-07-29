@@ -8,6 +8,7 @@ const isPublicRoute = createRouteMatcher([
   '/admin(.*)',
   '/sign-in(.*)',
   '/sign-up(.*)',
+  '/admin(.*)'
 ])
 
 // clerkMiddleware runs on every request matched by config.matcher below.

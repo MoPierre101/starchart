@@ -1,4 +1,5 @@
-/** Reserves the admin overview route for the future mission-control dashboard. */
+import { AdminOverviewPage as AdminOverview } from "@/features/admin/components/admin-overview-page";
+
 export default function AdminOverviewPage() {
-  return null
+  return <AdminOverview />;
 }
