@@ -1,19 +1,11 @@
 "use client";
 
 import { UserButton } from "@clerk/nextjs";
-import { ListFilter, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverDescription,
-  PopoverHeader,
-  PopoverTitle,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import StarChartSearch from "../../import/components/search-bar";
 
