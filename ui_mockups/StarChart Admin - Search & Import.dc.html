@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-thumb { background: #C9B79C; border-radius: 0; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    a { text-decoration: none; color: inherit; }
+    textarea, input, select { font-family: 'Space Grotesk', sans-serif; }
+  </style>
+</helmet>
+
+<div style="display:flex;flex-direction:column;height:100vh;width:100%;overflow:hidden;--cream:#F1E9DC;--surface:#FAF6EE;--ink:#1E1611;--espresso:#4A2F1E;--ai:#A8571F;--success:#5E7C3D;--warning:#A67C2E;--danger:#A83F2E;--muted:#948066;--muted2:#5C4A3A;--line:#D9CBB4;--line2:#EDE3D2;--black:#000000;--black2:#0A0A0A;--black3:#141414;--blackline:#262626;--blacktext:#8C8272;--blacktext2:#7A6A56;--blacktext3:#D9C7AC;background:var(--cream);color:var(--ink);">
+<header style="flex:none;height:52px;display:flex;align-items:center;gap:10px;padding:0 12px;background:var(--black);border-bottom:1px solid var(--blackline)">
+    <div style="display:flex;align-items:center;gap:7px;flex:none;padding-right:10px;border-right:1px solid var(--blackline)">
+      <div style="width:22px;height:22px;background:var(--cream);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--black);font-weight:700;font-family:'IBM Plex Mono',monospace;flex:none">SC</div>
+      <span style="font-size:11px;font-weight:600;color:var(--blacktext);font-family:'IBM Plex Mono',monospace;white-space:nowrap">starchart-admin</span>
+    </div>
+    <nav style="display:flex;align-items:center;gap:1px;flex:0 1 auto;max-width:44%;min-width:0;overflow-x:auto;scrollbar-width:none">
+      <a href="StarChart Admin - Shell & Overview v2.dc.html" style="display:flex;align-items:center;padding:6px 9px;border-radius:4px;font-size:12px;font-weight:600;white-space:nowrap;flex:none;text-decoration:none;background:var(--cream);color:var(--black);">Overview</a>
+      <a href="StarChart Admin - Structure.dc.html" style="display:flex;align-items:center;padding:6px 9px;border-radius:4px;font-size:12px;font-weight:600;white-space:nowrap;flex:none;text-decoration:none;background:transparent;color:var(--blacktext);">Structure</a>
+      <a href="StarChart Admin - Content.dc.html" style="display:flex;align-items:center;padding:6px 9px;border-radius:4px;font-size:12px;font-weight:600;white-space:nowrap;flex:none;text-decoration:none;background:transparent;color:var(--blacktext);">Content</a>
+      <a href="StarChart Admin - Sequences.dc.html" style="display:flex;align-items:center;padding:6px 9px;border-radius:4px;font-size:12px;font-weight:600;white-space:nowrap;flex:none;text-decoration:none;background:transparent;color:var(--blacktext);">Sequences</a>
+      <a href="StarChart Admin - Review.dc.html" style="display:flex;align-items:center;padding:6px 9px;border-radius:4px;font-size:12px;font-weight:600;white-space:nowrap;flex:none;text-decoration:none;background:transparent;color:var(--blacktext);">Review<span style="background:var(--ai);color:var(--cream);font-size:9px;font-weight:700;border-radius:4px;padding:1px 5px;margin-left:6px;font-family:'IBM Plex Mono',monospace">7</span></a>
+      <a href="StarChart Admin - AI Curation.dc.html" style="display:flex;align-items:center;padding:6px 9px;border-radius:4px;font-size:12px;font-weight:600;white-space:nowrap;flex:none;text-decoration:none;background:transparent;color:var(--blacktext);">AI Curation</a>
+      <a href="StarChart Admin - Admin.dc.html" style="display:flex;align-items:center;padding:6px 9px;border-radius:4px;font-size:12px;font-weight:600;white-space:nowrap;flex:none;text-decoration:none;background:transparent;color:var(--blacktext);">Admin</a>
+    </nav>
+
+    <div style="flex:1 1 120px;min-width:120px;max-width:520px;position:relative;margin:0 6px">
+      <div style="display:flex;align-items:center;gap:6px;background:var(--black3);border:1px solid var(--blackline);border-radius:4px;padding:0 4px 0 10px;height:32px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--blacktext)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" value="{{ topQuery }}" onChange="{{ setTopQuery }}" placeholder="Search pages or external sources…" style="background:transparent;border:none;outline:none;font-size:12px;color:var(--cream);font-family:'Space Grotesk',sans-serif;flex:1;min-width:0">
+        <sc-if value="{{ topSearchActive }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ clearTopQuery }}" aria-label="Clear search" style="border:none;background:none;color:var(--blacktext);cursor:pointer;font-size:13px;padding:4px;line-height:1">✕</button>
+        </sc-if>
+        <button onClick="{{ toggleTopFilter }}" aria-label="Filter external sources" style="{{ topFilterBtnStyle }}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+        </button>
+      </div>
+
+      <sc-if value="{{ topFilterOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;top:38px;right:0;width:220px;background:var(--surface);border:1px solid var(--line);border-radius:4px;box-shadow:0 8px 24px rgba(0,0,0,.25);padding:12px;z-index:60">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:8px">EXTERNAL SOURCES</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <sc-for list="{{ sourceToggles }}" as="s" hint-placeholder-count="4">
+              <button onClick="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ topSearchActive }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;top:38px;left:0;width:100%;min-width:340px;background:var(--surface);border:1px solid var(--line);border-radius:4px;box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:60;overflow:hidden">
+          <sc-if value="{{ hasPageMatches }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:8px 10px 4px;font-size:9.5px;font-weight:700;letter-spacing:1.2px;color:var(--muted)">PAGES</div>
+            <sc-for list="{{ pageMatches }}" as="p" hint-placeholder-count="2">
+              <a href="{{ p.href }}" style="{{ p.style }}" style-hover="{{ p.hoverStyle }}">
+                <span style="{{ p.monogramStyle }}">{{ p.monogram }}</span>
+                <span style="font-size:13px;font-weight:600;color:var(--ink)">{{ p.label }}</span>
+              </a>
+            </sc-for>
+          </sc-if>
+          <sc-if value="{{ hasExtMatches }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:10px 10px 4px;font-size:9.5px;font-weight:700;letter-spacing:1.2px;color:var(--muted);border-top:1px solid var(--line2)">EXTERNAL RESULTS</div>
+            <sc-for list="{{ extMatches }}" as="r" hint-placeholder-count="3">
+              <div style="{{ r.style }}" style-hover="{{ r.hoverStyle }}">
+                <span style="{{ r.formatStyle }}">{{ r.formatLabel }}</span>
+                <div style="flex:1;min-width:0">
+                  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                    <strong style="font-size:13px;color:var(--ink)">{{ r.name }}</strong>
+                    <span style="font-family:monospace;font-size:10.5px;color:var(--muted)">{{ r.year }}</span>
+                    <span style="{{ r.sourceStyle }}">{{ r.sourceLabel }}</span>
+                  </div>
+                </div>
+                <sc-if value="{{ r.added }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-size:10.5px;font-weight:700;color:var(--success);white-space:nowrap">✓ Added</span>
+                </sc-if>
+                <sc-if value="{{ r.notAdded }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ r.onImport }}" style="border:none;background:var(--ink);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:11.5px;border-radius:4px;padding:6px 12px;cursor:pointer;white-space:nowrap">↓ Import</button>
+                </sc-if>
+              </div>
+            </sc-for>
+            <a href="#pending-queue" onClick="{{ clearTopQuery }}" style="display:block;padding:9px 10px;font-size:12px;font-weight:600;color:var(--espresso);border-top:1px solid var(--line2)">View all results in the queue →</a>
+          </sc-if>
+          <sc-if value="{{ noTopMatches }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:16px;text-align:center;font-size:12px;color:var(--muted)">No pages or external matches</div>
+          </sc-if>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px;flex:none">
+      <div style="width:26px;height:26px;flex:none;border-radius:4px;background:var(--ai);display:flex;align-items:center;justify-content:center;color:var(--cream);font-size:10.5px;font-weight:700;cursor:pointer;font-family:'IBM Plex Mono',monospace">AC</div>
+    </div>
+  </header>
+  <div style="flex:1;display:flex;min-width:0;overflow:hidden">
+  <div style="position:relative;display:flex;flex:1;min-height:0;overflow:hidden;background:var(--cream);color:var(--ink);font-family:'Space Grotesk',system-ui,sans-serif;font-size:14px;line-height:1.5">
+
+  <!-- ═══ MAIN ═══ -->
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden">
+
+    <main data-screen-label="Search & Import" style="flex:1;overflow-y:auto;padding:24px 28px 52px">
+
+      <div style="max-width:1280px">
+        <sc-if value="{{ hasActionFeedback }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;background:var(--cream);border:1px solid rgba(16,185,129,.2);border-radius:4px;padding:9px 14px">
+            <span style="font-size:12.5px;color:var(--success);font-weight:600">✓ {{ actionFeedback }}</span>
+            <button onClick="{{ clearFeedback }}" style="background:none;border:none;cursor:pointer;color:var(--success);font-size:13px;padding:0;line-height:1">✕</button>
+          </div>
+        </sc-if>
+
+        <div id="pending-queue" style="display:flex;align-items:baseline;gap:10px;margin-bottom:12px">
+          <h2 style="margin:0;font-size:15px;font-weight:700;color:var(--ink)">Results</h2>
+          <span style="font-size:12px;color:var(--muted)">{{ externalCount }} ready to import</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px">
+          <sc-for list="{{ externalResults }}" as="r" hint-placeholder-count="5">
+            <div style="{{ r.cardStyle }}">
+              <div style="{{ r.posterStyle }}">
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.5px">poster</span>
+              </div>
+              <div style="{{ r.overlayStyle }}"></div>
+              <div style="position:relative;z-index:1;display:flex;flex-direction:column;gap:8px;padding:12px;margin-top:auto">
+                <span style="{{ r.formatBadgeStyle }}">{{ r.formatLabel }}</span>
+                <strong style="font-size:13px;line-height:1.25;color:#fff;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">{{ r.name }}</strong>
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                  <span style="font-size:10px;font-weight:600;color:rgba(255,255,255,.85);background:rgba(255,255,255,.16);border-radius:20px;padding:3px 9px;font-family:monospace">{{ r.year }}</span>
+                  <span style="font-size:10px;font-weight:600;color:rgba(255,255,255,.85);background:rgba(255,255,255,.16);border-radius:20px;padding:3px 9px">{{ r.sourceLabel }}</span>
+                </div>
+                <sc-if value="{{ r.notAdded }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ r.onImport }}" style="border:none;background:#fff;color:var(--ink);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11.5px;border-radius:20px;padding:7px 10px;cursor:pointer;white-space:nowrap">↓ Import</button>
+                </sc-if>
+                <sc-if value="{{ r.added }}" hint-placeholder-val="{{ false }}">
+                  <div style="border:1px solid rgba(255,255,255,.5);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:11.5px;border-radius:20px;padding:7px 10px;text-align:center">✓ Added</div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ noExternal }}" hint-placeholder-val="{{ false }}">
+            <div style="grid-column:1/-1;border:1.5px dashed var(--line);border-radius:8px;padding:24px;text-align:center;color:var(--muted);font-size:13px">Nothing pending — matches you pick from the top search will land here for placement.</div>
+          </sc-if>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- IMPORT SLIDE-OVER -->
+  <sc-if value="{{ importOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeImport }}" style="position:absolute;inset:0;background:rgba(30,22,17,.45);z-index:50"></div>
+    <aside style="position:absolute;top:0;right:0;height:100vh;width:440px;max-width:92vw;background:var(--surface);border-left:1px solid var(--line);display:flex;flex-direction:column;z-index:51">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line)">
+        <h2 style="margin:0;font-size:17px;font-weight:700;color:var(--ink)">Import title</h2>
+        <button onClick="{{ closeImport }}" style="border:none;background:var(--line);color:var(--muted2);font-size:14px;border-radius:8px;width:30px;height:30px;cursor:pointer;line-height:1">✕</button>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:20px 22px">
+
+        <div style="display:flex;gap:12px;border:1px solid var(--line);background:var(--cream);border-radius:4px;padding:12px;margin-bottom:6px">
+          <span style="{{ imp.formatStyle }}">{{ imp.formatLabel }}</span>
+          <div style="flex:1;min-width:0">
+            <strong style="font-size:14.5px;color:var(--ink)">{{ imp.name }}</strong>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span style="{{ imp.sourceStyle }}">{{ imp.sourceLabel }}</span>
+              <span style="font-family:monospace">{{ imp.externalId }}</span>
+              <span style="font-family:monospace">{{ imp.year }}</span>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:18px">metadata will be cached on the record from <strong>{{ imp.sourceLabel }}</strong></div>
+
+        <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:1.5px;margin-bottom:6px">SUBCATEGORY</div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px">
+          <sc-for list="{{ subcategoryOptions }}" as="s" hint-placeholder-count="4">
+            <button onClick="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button>
+          </sc-for>
+        </div>
+
+        <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:1.5px;margin-bottom:6px">ERA</div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px">
+          <sc-for list="{{ eraOptions }}" as="e" hint-placeholder-count="4">
+            <button onClick="{{ e.onClick }}" style="{{ e.style }}">{{ e.label }}</button>
+          </sc-for>
+        </div>
+
+        <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:1.5px;margin-bottom:6px">CANON STATUS</div>
+        <div style="display:flex;gap:8px;margin-bottom:18px">
+          <button onClick="{{ setCanonCanon }}" style="{{ canonCanonStyle }}">Canon</button>
+          <button onClick="{{ setCanonElse }}" style="{{ canonElseStyle }}">Elseworlds</button>
+        </div>
+
+        <div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:1.5px;margin-bottom:6px">PUBLISH STATUS</div>
+        <div style="display:flex;gap:8px;margin-bottom:6px">
+          <button onClick="{{ setStatusDraft }}" style="{{ statusDraftStyle }}">Draft</button>
+          <button onClick="{{ setStatusLive }}" style="{{ statusLiveStyle }}">Live</button>
+          <button onClick="{{ setStatusHidden }}" style="{{ statusHiddenStyle }}">Hidden</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:18px">imports land as <strong>Draft</strong> by default — review before going live</div>
+
+        <sc-if value="{{ imp.hasChildren }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid var(--line);background:var(--cream);border-radius:4px;padding:12px 14px;display:flex;align-items:center;gap:12px">
+            <button onClick="{{ toggleAutofetch }}" style="{{ autofetchStyle }}"><span style="{{ autofetchKnob }}"></span></button>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600;font-size:13px;color:var(--ink)">Auto-fetch {{ imp.childUnit }}</div>
+              <div style="font-size:11.5px;color:var(--muted2)">{{ imp.childPreview }} pulled from {{ imp.sourceLabel }} as child records</div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+      <div style="border-top:1px solid var(--line);padding:14px 22px;display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeImport }}" style="border:1px solid var(--line);background:var(--cream);color:var(--muted2);font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;border-radius:4px;padding:9px 18px;cursor:pointer">Cancel</button>
+        <button onClick="{{ confirmImport }}" style="border:none;background:var(--ink);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;border-radius:4px;padding:9px 20px;cursor:pointer">↓ Import &amp; place</button>
+      </div>
+    </aside>
+  </sc-if>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;admin&quot;,&quot;moderator&quot;],&quot;default&quot;:&quot;admin&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = {
+    imported: {}, importingId: null,
+    topQuery: '', topFilterOpen: false, topSources: { tmdb: true, metron: true, comicvine: true, marvel: true }, actionFeedback: null,
+    form: { subcategory: 'DC Comics', era: 'Rebirth', canon: 'canon', status: 'draft', autofetch: true },
+  };
+
+  externalData() {
+    return [
+      { id: 'tmdb:1058694', name: 'The Batman Part II', format: 'FILM', source: 'tmdb', year: 2027, preAdded: false, overview: "Matt Reeves' sequel to the 2022 noir reimagining. Pre-release record — metadata sparse until closer to launch.", children: 0 },
+      { id: 'tmdb:114120', name: 'Batman: Caped Crusader', format: 'SERIES', source: 'tmdb', year: 2024, preAdded: false, overview: "Bruce Timm's noir animated reimagining for Prime Video. A standalone continuity.", children: 10 },
+      { id: 'metron:88231', name: "Batman '89", format: 'RUN', source: 'metron', year: 2021, preAdded: false, overview: 'A continuation of the Tim Burton film continuity by Sam Hamm and Joe Quinones.', children: 6 },
+      { id: 'metron:14002', name: 'Batman: Hush', format: 'TPB', source: 'metron', year: 2003, preAdded: false, overview: "Jeph Loeb and Jim Lee's star-studded mystery — a frequent modern entry point. Collected edition.", children: 0 },
+      { id: 'tmdb:2287', name: 'Batman: The Animated Series', format: 'SERIES', source: 'tmdb', year: 1992, preAdded: false, overview: 'The defining DCAU series. Would land under DCAU once that subcategory goes live.', children: 85 },
+      { id: 'tmdb:414906', name: 'The Batman', format: 'FILM', source: 'tmdb', year: 2022, preAdded: true, overview: "Already in StarChart under DCU — Elseworlds. Shown here so you don't re-import.", children: 0 },
+    ];
+  }
+
+  fmtMeta(f) { const m = { FILM: { c: 'var(--muted2)', bg: 'var(--cream)' }, SERIES: { c: 'var(--ai)', bg: 'var(--cream)' }, RUN: { c: 'var(--success)', bg: 'var(--cream)' }, ISSUE: { c: 'var(--warning)', bg: 'var(--cream)' }, TPB: { c: 'var(--muted2)', bg: 'var(--cream)' } }; return m[f] || m.TPB; }
+  fmtStyle(f) { const mt = this.fmtMeta(f); return { flex: 'none', alignSelf: 'flex-start', display: 'inline-block', width: 'auto', fontFamily: 'monospace', fontWeight: '700', fontSize: '9.5px', color: mt.c, background: mt.bg, borderRadius: '4px', padding: '3px 8px', whiteSpace: 'nowrap' }; }
+  fmtBadgeStyle(f) { const mt = this.fmtMeta(f); return { alignSelf: 'flex-start', display: 'inline-block', fontFamily: 'monospace', fontWeight: '700', fontSize: '9.5px', color: '#fff', background: 'rgba(255,255,255,.16)', borderRadius: '20px', padding: '3px 9px', whiteSpace: 'nowrap' }; }
+  sourceMeta(s) { const m = { tmdb: { label: 'TMDB', c: 'var(--muted2)' }, metron: { label: 'Metron', c: 'var(--success)' }, comicvine: { label: 'ComicVine', c: 'var(--ai)' }, marvel: { label: 'Marvel API', c: 'var(--warning)' } }; return m[s] || m.tmdb; }
+  sourceStyle(s) { const m = this.sourceMeta(s); return { fontSize: '9.5px', fontWeight: '700', fontFamily: 'monospace', color: m.c, background: `${m.c}14`, borderRadius: '4px', padding: '2px 8px', whiteSpace: 'nowrap', display: 'inline-block' }; }
+  mkTab(active) {
+    return active
+      ? { background: 'var(--ink)', color: '#fff', border: '1px solid var(--ink)', borderRadius: '4px', padding: '5px 12px', fontSize: '12px', fontWeight: '600', cursor: 'pointer', fontFamily: "'Space Grotesk',sans-serif" }
+      : { background: 'var(--cream)', color: 'var(--muted2)', border: '1px solid var(--cream)', borderRadius: '4px', padding: '5px 12px', fontSize: '12px', fontWeight: '500', cursor: 'pointer', fontFamily: "'Space Grotesk',sans-serif" };
+  }
+
+  openImport(ext) {
+    const sub = ext.source === 'tmdb' ? 'DCU' : 'DC Comics';
+    const era = sub === 'DCU' ? 'DCU Chapter One' : 'Rebirth';
+    this.setState({ importingId: ext.id, form: { subcategory: sub, era, canon: 'canon', status: 'draft', autofetch: true } });
+  }
+
+  renderVals() {
+    const role = this.props.role ?? 'admin';
+    const topQuery = this.state.topQuery;
+    const topSearchActive = topQuery.trim().length > 0;
+    const q = topQuery.toLowerCase().trim();
+    const activeSources = this.state.topSources;
+
+    const pagesCatalog = [
+      { label: 'Overview', href: 'StarChart Admin - Shell & Overview v2.dc.html', m: 'Ov' },
+      { label: 'Structure', href: 'StarChart Admin - Structure.dc.html', m: 'St' },
+      { label: 'Content', href: 'StarChart Admin - Content.dc.html', m: 'Co' },
+      { label: 'Sequences', href: 'StarChart Admin - Sequences.dc.html', m: 'Sq' },
+      { label: 'Review', href: 'StarChart Admin - Review.dc.html', m: 'Rv' },
+      { label: 'AI Curation', href: 'StarChart Admin - AI Curation.dc.html', m: 'AI' },
+      ...(role === 'admin' ? [{ label: 'Admin', href: 'StarChart Admin - Admin.dc.html', m: 'Ad' }] : []),
+    ];
+    const pageMatches = topSearchActive ? pagesCatalog.filter(p => p.label.toLowerCase().includes(q)).map(p => ({
+      label: p.label, monogram: p.m, href: p.href,
+      style: { display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', borderRadius: '4px', textDecoration: 'none' },
+      hoverStyle: { background: 'var(--line2)' },
+      monogramStyle: { width: '26px', height: '26px', flex: 'none', borderRadius: '4px', background: 'var(--line2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'IBM Plex Mono',monospace", fontSize: '10px', fontWeight: '700', color: 'var(--muted2)' },
+    })) : [];
+    const hasPageMatches = pageMatches.length > 0;
+
+    const allExternal = this.externalData();
+    const extMatches = topSearchActive ? allExternal.filter(e => activeSources[e.source] !== false && e.name.toLowerCase().includes(q)).slice(0, 5).map(e => {
+      const added = e.preAdded || !!this.state.imported[e.id];
+      return {
+        id: e.id, name: e.name, year: e.year, formatLabel: e.format, formatStyle: this.fmtStyle(e.format),
+        sourceLabel: this.sourceMeta(e.source).label, sourceStyle: this.sourceStyle(e.source),
+        added, notAdded: !added,
+        style: { display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px' },
+        hoverStyle: { background: 'var(--line2)' },
+        onImport: () => { this.openImport(e); this.setState({ topQuery: '' }); },
+      };
+    }) : [];
+    const hasExtMatches = extMatches.length > 0;
+    const noTopMatches = topSearchActive && !hasPageMatches && !hasExtMatches;
+
+    const sourceLabels = { tmdb: 'TMDB', metron: 'Metron', comicvine: 'ComicVine', marvel: 'Marvel API' };
+    const sourceToggles = Object.keys(sourceLabels).map(key => {
+      const active = activeSources[key] !== false;
+      return {
+        label: sourceLabels[key],
+        style: active
+          ? { background: 'var(--ink)', color: '#fff', border: '1px solid var(--ink)', borderRadius: '4px', padding: '5px 10px', fontSize: '11.5px', fontWeight: '600', cursor: 'pointer', fontFamily: "'Space Grotesk',sans-serif" }
+          : { background: 'var(--cream)', color: 'var(--muted2)', border: '1px solid var(--line)', borderRadius: '4px', padding: '5px 10px', fontSize: '11.5px', fontWeight: '500', cursor: 'pointer', fontFamily: "'Space Grotesk',sans-serif" },
+        onClick: () => this.setState(s => ({ topSources: { ...s.topSources, [key]: !active } })),
+      };
+    });
+
+    const externalResults = allExternal.map(e => {
+      const added = e.preAdded || !!this.state.imported[e.id];
+      return {
+        ...e, formatLabel: e.format, formatStyle: this.fmtStyle(e.format), formatBadgeStyle: this.fmtBadgeStyle(e.format),
+        sourceLabel: this.sourceMeta(e.source).label, sourceStyle: this.sourceStyle(e.source),
+        externalId: e.id, hasChildren: e.children > 0,
+        childPreview: e.children > 0 ? `~${e.children} ${e.format === 'SERIES' ? 'episodes' : 'issues'} auto-fetched` : '',
+        added, notAdded: !added,
+        cardStyle: { position: 'relative', display: 'flex', flexDirection: 'column', aspectRatio: '3/4', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 6px 20px rgba(30,22,17,.15)' },
+        posterStyle: { position: 'absolute', inset: '0', background: `repeating-linear-gradient(135deg, #4a4038, #4a4038 8px, #3a322c 8px, #3a322c 16px)`, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '40%' },
+        overlayStyle: { position: 'absolute', inset: '0', background: 'linear-gradient(to top, rgba(10,8,6,.92) 0%, rgba(10,8,6,.55) 40%, rgba(10,8,6,0) 68%)' },
+        onImport: () => this.openImport(e),
+      };
+    });
+
+    const importingId = this.state.importingId;
+    const importOpen = !!importingId;
+    const impRaw = this.externalData().find(e => e.id === importingId) || {};
+    const imp = {
+      name: impRaw.name, year: impRaw.year, externalId: impRaw.id,
+      formatLabel: impRaw.format, formatStyle: this.fmtStyle(impRaw.format || 'FILM'),
+      sourceLabel: impRaw.source ? this.sourceMeta(impRaw.source).label : '', sourceStyle: this.sourceStyle(impRaw.source || 'tmdb'),
+      hasChildren: (impRaw.children || 0) > 0,
+      childUnit: impRaw.format === 'SERIES' ? 'episodes' : 'issues',
+      childPreview: (impRaw.children || 0) > 0 ? `~${impRaw.children} ${impRaw.format === 'SERIES' ? 'episodes' : 'issues'}` : '',
+    };
+
+    const f = this.state.form;
+    const eraBySub = { 'DC Comics': ['Post-Crisis', 'New 52', 'Rebirth', 'Infinite Frontier', 'Dawn of DC', 'All In'], DCU: ['DCU Chapter One'], DCEU: ['Worlds of DC', 'DCEU Finale'], DCAU: ['Batman TAS Era', 'Justice League Era'] };
+    const subcategoryOptions = ['DC Comics', 'DCU', 'DCEU', 'DCAU'].map(l => ({ label: l, style: this.mkTab(f.subcategory === l), onClick: () => this.setState(s => ({ form: { ...s.form, subcategory: l, era: (eraBySub[l] || [''])[0] } })) }));
+    const eraOptions = (eraBySub[f.subcategory] || []).map(l => ({ label: l, style: this.mkTab(f.era === l), onClick: () => this.setState(s => ({ form: { ...s.form, era: l } })) }));
+
+    return {
+      topQuery, setTopQuery: (e) => this.setState({ topQuery: e.target.value }), clearTopQuery: () => this.setState({ topQuery: '' }),
+      topSearchActive, pageMatches, hasPageMatches, extMatches, hasExtMatches, noTopMatches,
+      topFilterOpen: this.state.topFilterOpen, toggleTopFilter: () => this.setState(s => ({ topFilterOpen: !s.topFilterOpen })),
+      topFilterBtnStyle: { flex: 'none', border: 'none', background: this.state.topFilterOpen ? 'var(--blackline)' : 'transparent', color: 'var(--blacktext)', borderRadius: '4px', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' },
+      sourceToggles,
+
+      externalResults, externalCount: externalResults.filter(r => !r.added).length, noExternal: externalResults.length === 0,
+
+      actionFeedback: this.state.actionFeedback, hasActionFeedback: !!this.state.actionFeedback,
+      clearFeedback: () => this.setState({ actionFeedback: null }),
+
+      importOpen, imp, closeImport: () => this.setState({ importingId: null }),
+      confirmImport: () => {
+        const id = importingId;
+        const name = impRaw.name || 'Title';
+        this.setState({ imported: { ...this.state.imported, [id]: true }, importingId: null, actionFeedback: `${name} imported as Draft` });
+      },
+      subcategoryOptions, eraOptions,
+      canonCanonStyle: this.mkTab(f.canon === 'canon'), canonElseStyle: this.mkTab(f.canon === 'elseworlds'),
+      setCanonCanon: () => this.setState(s => ({ form: { ...s.form, canon: 'canon' } })),
+      setCanonElse: () => this.setState(s => ({ form: { ...s.form, canon: 'elseworlds' } })),
+      statusDraftStyle: this.mkTab(f.status === 'draft'), statusLiveStyle: this.mkTab(f.status === 'live'), statusHiddenStyle: this.mkTab(f.status === 'hidden'),
+      setStatusDraft: () => this.setState(s => ({ form: { ...s.form, status: 'draft' } })),
+      setStatusLive: () => this.setState(s => ({ form: { ...s.form, status: 'live' } })),
+      setStatusHidden: () => this.setState(s => ({ form: { ...s.form, status: 'hidden' } })),
+      toggleAutofetch: () => this.setState(s => ({ form: { ...s.form, autofetch: !s.form.autofetch } })),
+      autofetchStyle: { width: '42px', height: '24px', flex: 'none', borderRadius: '4px', border: 'none', cursor: 'pointer', background: f.autofetch ? 'var(--espresso)' : 'var(--line)', position: 'relative', padding: 0 },
+      autofetchKnob: { position: 'absolute', top: '2px', left: f.autofetch ? '20px' : '2px', width: '20px', height: '20px', borderRadius: '50%', background: '#fff', transition: 'left .12s ease' },
+    };
+  }
+}
+
+</script>
+</body>
+</html>

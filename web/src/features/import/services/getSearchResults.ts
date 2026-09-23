@@ -1,15 +1,35 @@
-export async function Search(params?: string ){ //Params should be an object with search etc
+"use server";
 
-    const url = new URL(`${process.env.HOST}/api/search`)
+import { SearchResponseSchema, type SearchResponse } from "../search.schema";
 
-    url.search = new URLSearchParams(params).toString()
+type GetSearchResultsParams = {
+  provider: string;
+  query: string;
+};
 
-    const res = await fetch(url)
+type SearchResults =
+  | { success: true; data: SearchResponse }
+  | { success: false; error: string };
 
-    if(!res.ok) throw new Error("Failed to fetch results of query")
+export async function getSearchResults({
+  provider,
+  query,
+}: GetSearchResultsParams): Promise<SearchResults> {
+  const url = new URL(`/search/${provider}`, process.env.BACKEND_API_URL);
+  url.searchParams.set("query", query);
 
-    
-    return res.json()
+  const response = await fetch(url);
 
-    
+  if (!response.ok) {
+    return { success: false, error: `Search request failed (${response.status})` };
+  }
+
+  const json = await response.json();
+  const parsed = SearchResponseSchema.safeParse(json);
+
+  if (!parsed.success) {
+    return { success: false, error: "Unexpected response shape from search API" };
+  }
+
+  return { success: true, data: parsed.data };
 }

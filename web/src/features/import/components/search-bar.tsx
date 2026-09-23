@@ -1,68 +1,67 @@
+"use client";
+
+import { useState } from "react";
+import { Search } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverDescription,
-  PopoverHeader,
-  PopoverTitle,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { ListFilter, Search } from "lucide-react";
 
-export default function StarChartSearch() {
+type SearchBarProps = {
+  providers: string[];
+  isSearching?: boolean;
+  onSearch: (search: { provider: string; query: string }) => void;
+};
+
+export function SearchBar({
+  providers,
+  isSearching = false,
+  onSearch,
+}: SearchBarProps) {
+  const [value, setValue] = useState("");
+  const [provider, setProvider] = useState(providers[0] ?? "");
+
   return (
-    <div className="ml-auto hidden w-full max-w-72 items-center gap-1.5 md:flex">
-      <div className="relative min-w-0 flex-1">
-        <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-admin-black-text" />
+    <form
+      role="search"
+      onSubmit={(event) => {
+        event.preventDefault();
+        const query = value.trim();
+        if (provider && query) {
+          onSearch({ provider, query });
+        }
+      }}
+      className="flex w-full items-center gap-2"
+    >
+      <select
+        name="provider"
+        aria-label="Search provider"
+        value={provider}
+        onChange={(event) => setProvider(event.target.value)}
+        disabled={providers.length === 0}
+        className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+      >
+        {providers.length === 0 && <option value="">No providers</option>}
+        {providers.map((id) => (
+          <option key={id} value={id}>
+            {id}
+          </option>
+        ))}
+      </select>
+      <div className="relative flex-1">
+        <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          aria-label="Search"
-          placeholder="Search..."
-          className="h-8 border-admin-black-line bg-admin-black-soft pl-8 text-xs text-admin-surface placeholder:text-admin-black-text focus-visible:border-admin-muted focus-visible:ring-admin-muted/30"
+          type="search"
+          name="query"
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          placeholder="Search pages or external sources…"
+          aria-label="Search external sources"
+          className="h-10 rounded-full pl-8"
         />
       </div>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            aria-label="Filter search"
-            variant="outline"
-            size="icon"
-            className="border-admin-black-line bg-admin-black-soft text-admin-surface hover:bg-admin-black-line hover:text-admin-surface"
-          >
-            <ListFilter />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          align="end"
-          className="admin-theme w-64 bg-admin-surface p-3"
-        >
-          <PopoverHeader>
-            <PopoverTitle>Search filters</PopoverTitle>
-            <PopoverDescription>
-              Limit results to selected external sources.
-            </PopoverDescription>
-          </PopoverHeader>
-          <div
-            className="flex flex-wrap gap-2"
-            aria-label="External source filters"
-          >
-            <Button variant="outline" size="sm">
-              TMDB
-            </Button>
-            <Button variant="outline" size="sm">
-              Metron
-            </Button>
-            <Button variant="outline" size="sm">
-              ComicVine
-            </Button>
-            <Button variant="outline" size="sm">
-              Marvel API
-            </Button>
-          </div>
-          {/* state: bind selected source filters here */}
-        </PopoverContent>
-      </Popover>
-      {/* state: bind the global query and route submissions to /admin/import */}
-    </div>
+      <Button type="submit" size="lg" disabled={isSearching || !provider}>
+        {isSearching ? "Searching…" : "Search"}
+      </Button>
+    </form>
   );
 }
