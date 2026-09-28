@@ -47,9 +47,29 @@ Code dependencies at the provider boundary: `application service -> SearchProvid
 
 Classify a transformation by its purpose: TMDB JSON to a common result belongs to infrastructure; a result to an HTTP response belongs to presentation; a franchise prerequisite decision belongs to domain. A `models` or `schemas` folder is a naming choice, not a layer by itself.
 
+## 2026-09-27: Provider construction and direct route calls
+
+- A `get_tmdb_provider()` function inside infrastructure is construction code and does not by itself cross a layer boundary. It can be reused by other infrastructure dependencies.
+- Importing `get_tmdb_provider()` into a presentation route is a presentation-to-infrastructure code dependency. The existing route already makes that import for `get_search_service()`. A strict inward-only dependency rule would move wiring to the app composition root, such as `main.py`, and keep the route dependent on an application service or interface.
+- A presentation route that injects `TMDBProvider` and calls its detail methods directly would also skip the application layer. Keep that route dependent on an application service when preserving the current request flow matters.
+- FastAPI supports dependencies built from other dependencies, so provider construction can be shared without exposing the concrete provider to a route.
+
+## 2026-09-27: Layer responsibilities
+
+| Layer | Knows about | Does not know about |
+| --- | --- | --- |
+| Presentation | FastAPI, HTTP, and application services | TMDB, HTTPX, and API keys |
+| Application | Search rules, provider interfaces, and result models | FastAPI, HTTPX, and TMDB |
+| Infrastructure | TMDB, HTTPX, settings, and application interfaces | FastAPI routes |
+| `main.py` | The implementations needed to assemble the application | Business logic |
+
+The source-code dependency direction is `presentation -> application` and `infrastructure -> application`. `main.py` is the outer setup point that is allowed to import and connect all three layers.
+
 ## Sources
 
 - [Martin Fowler, Presentation Domain Data Layering](https://martinfowler.com/bliki/PresentationDomainDataLayering.html)
 - [Robert C. Martin, The Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 - [FastAPI, Bigger Applications](https://fastapi.tiangolo.com/tutorial/bigger-applications/)
 - [HTTPX, Async Support](https://www.python-httpx.org/async/)
+- [FastAPI, Sub-dependencies](https://fastapi.tiangolo.com/tutorial/dependencies/sub-dependencies/)
+- [Microsoft, Common web application architectures](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures)

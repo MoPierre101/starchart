@@ -1,15 +1,15 @@
 import { ImportPage } from "@/features/import/components/import-page";
-import { getSearchProviders } from "@/features/import/services/getSearchProviders";
+import { getSearchCategories } from "@/features/import/services/getSearchCategories";
 
 export default async function AdminImportPage() {
-  let providers: string[] = [];
-  let providersError: string | undefined;
+  let categories: string[] = [];
+  let categoriesError: string | undefined;
 
   try {
-    providers = await getSearchProviders();
+    categories = await getSearchCategories();
   } catch {
-    providersError = "Could not load search providers. Reload the page to try again.";
+    categoriesError = "Could not load search categories. Reload the page to try again.";
   }
 
-  return <ImportPage providers={providers} providersError={providersError} />;
+  return <ImportPage categories={categories} categoriesError={categoriesError} />;
 }

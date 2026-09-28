@@ -1,11 +1,18 @@
 from pydantic import BaseModel
-from app.features.search.application.schemas.search import MediaSearchResult
+from app.features.search.application.models import MediaSearchResult
 
 
 class SearchResponse(BaseModel):
-    provider: str
+    category: str
     query: str
     results: list[MediaSearchResult]
 
-class ProvidersResponse(BaseModel):
-    providers: list[str]
+
+class SearchByIDResponse(BaseModel):
+    category: str
+    id: int
+    result: MediaSearchResult
+
+
+class CategoriesResponse(BaseModel):
+    categories: list[str]

@@ -10,5 +10,11 @@ class Settings(BaseSettings):
 
     tmdb_api_key: str = ""
 
+    metron_base_url: str = ""
+
+    metron_image_base_url: str = ""
+
+    metron_api_key: str = ""
+
 
 settings = Settings()

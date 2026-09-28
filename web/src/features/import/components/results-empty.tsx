@@ -20,7 +20,7 @@ const CONTENT = {
   error: {
     icon: TriangleAlert,
     title: "Search failed",
-    description: "Something went wrong reaching the search provider.",
+    description: "Something went wrong while searching this category.",
   },
 } as const;
 

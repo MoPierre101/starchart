@@ -7,25 +7,14 @@ import type { SearchResponse } from "../search.schema";
 import { getSearchResults } from "../services/getSearchResults";
 
 type UseSearchResultsParams = {
-  provider: string;
+  category: string;
   query: string;
 };
 
-export function useSearchResults({
-  provider,
-  query,
-}: UseSearchResultsParams) {
+export function useSearchResults({ category, query }: UseSearchResultsParams) {
   return useQuery<SearchResponse>({
-    queryKey: importKeys.search(provider, query),
-    queryFn: async () => {
-      const result = await getSearchResults({ provider, query });
-
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-
-      return result.data;
-    },
-    enabled: query.trim().length > 0,
+    queryKey: importKeys.search(category, query),
+    queryFn: () => getSearchResults({ category, query }),
+    enabled: category.length > 0 && query.trim().length > 0,
   });
 }

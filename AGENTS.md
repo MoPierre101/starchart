@@ -72,6 +72,24 @@ speculatively.
 The AI layer (`web/src/lib/ai/`) is intended to stay provider-agnostic:
 product logic should not be coupled to one embedding/recommendation vendor.
 
+## Evidence and sources
+
+Do not rely on model training data or memory as evidence for technical claims.
+Before answering any technical or software-engineering question, verify the
+material claims with at least one current source.
+
+* For library or framework behavior, prefer documentation or source code for
+  the exact installed version. If that is unavailable, use the current official
+  documentation or release notes.
+* For broader engineering claims, use primary research, an applicable standard,
+  official documentation, or a reliable technical article.
+* For claims about StarChart, inspect the actual repository. Do not infer current
+  behavior from roadmap text, intended architecture, or model memory.
+* Link the sources actually used in the conversational answer. If sources
+  disagree, explain the disagreement and do not silently choose one.
+* If a claim cannot be verified, say so plainly. Do not fill the gap with an
+  uncited recollection or present it as established fact.
+
 ## Working in `web/`
 
 Read `web/AGENTS.md` before touching frontend code — this Next.js version has
@@ -111,16 +129,15 @@ uv run fastapi dev app/main.py   # or the project's configured entry point
 
 ## Code notebook (`Notes/`)
 
-The user will frequently ask software-engineering questions during work on
-this repo (e.g. "what should I know about X", "how does Y work", "what's the
-best way to do Z"). For these:
+Only write or append to the code notebook when the user explicitly asks to
+write a note. When the user asks for a note:
 
 1. Use web search/fetch to research a current, accurate answer — don't answer
    from memory alone for anything version-sensitive (framework/library
    behavior, best practices, API shapes).
 2. Answer the user's question directly in the conversation first.
-3. Then write (or append to) an entry under `Notes/` capturing the answer for
-   future reference — this repo's running notebook.
+3. Write (or append to) an entry under `Notes/` capturing the answer for future
+   reference.
 
 Conventions for entries:
 * One file per topic: `Notes/<kebab-case-topic>.md` (e.g.

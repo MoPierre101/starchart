@@ -44,3 +44,38 @@ if it's sitting in the same registry, unused.
 Net effect: adding a third provider is a one-line change in
 `get_search_service()`'s dict — `ExternalSearchService` itself never changes,
 because its job (dispatch by name) is generic.
+
+## 2026-09-27: Simplifying the fixed category search
+
+The current registry maps a media category such as `visual_media` to a source
+such as `TMDBProvider`. The earlier provider-name route description above is
+historical. Only TMDb is registered today.
+
+- Keep the small service while it owns the category lookup and unknown-category
+  error. It keeps concrete source classes out of the route. A factory class or
+  a broad `Media` class would add work without serving the current flow.
+- FastAPI's dependency function is enough to assemble the service and can be
+  replaced in tests. The `SearchProvider` protocol is a type contract, not a
+  runtime plugin system.
+- `TMDBProvider` repeats authorization, client setup, status handling, and
+  error translation in three methods. A private request helper could remove
+  that repetition. Share an `httpx.AsyncClient` across requests only when
+  connection reuse matters, with an explicit shutdown step.
+- `TMDBProvider.search_id()` currently claims to return `MediaSearchResult` but
+  returns raw JSON. Give the raw detail response an honest type or normalize it
+  before using it. `MetronProvider._normalize_each_item()` never returns `None`,
+  so its optional type and caller check are unnecessary when Metron is edited.
+- A small `_client()` helper can hold the TMDb authorization, base URL, and
+  timeout. A `_get_json(client, path, params)` helper can hold GET, status
+  checking, and provider error translation. Pass the same client through the
+  season loop so it still reuses one connection for all season requests.
+- TMDb multi-search documents `language`, singular. The current search method
+  sends `languages`, plural; correct that parameter when editing `tmdb.py`.
+
+## Sources
+
+- https://fastapi.tiangolo.com/tutorial/dependencies/
+- https://fastapi.tiangolo.com/advanced/testing-dependencies/
+- https://docs.python.org/3/library/typing.html
+- https://www.python-httpx.org/async/
+- https://developer.themoviedb.org/reference/search-multi

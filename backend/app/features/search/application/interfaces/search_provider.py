@@ -1,19 +1,16 @@
 from typing import Protocol
 
-from app.features.search.application.schemas.search import MediaSearchResult
-
-
-class ProviderSearchError(RuntimeError):
-    """Raised when a provider's upstream request fails (bad status, network error)."""
-
-    def __init__(self, provider: str, message: str):
-        self.provider = provider
-        super().__init__(f"{provider} search failed: {message}")
+from app.features.search.application.models import MediaSearchResult, MediaType
 
 
 class SearchProvider(Protocol):
     """Strategy interface. Each external source implements this the same way."""
 
     name: str
+    supported_media_types: tuple[MediaType, ...]
 
     async def search(self, query: str) -> list[MediaSearchResult]: ...
+
+    async def search_by_id(
+        self, visual_media_id: int, media_type: MediaType
+    ) -> MediaSearchResult: ...

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// Mirrors backend/app/schemas/search.py — keep these in sync by hand.
+// Mirrors the backend search response models. Keep these in sync by hand.
 
 export const MediaSearchResultSchema = z.object({
   provider: z.string(),
@@ -14,14 +14,22 @@ export const MediaSearchResultSchema = z.object({
 });
 
 export const SearchResponseSchema = z.object({
-  provider: z.string(),
+  category: z.string(),
   query: z.string(),
   results: z.array(MediaSearchResultSchema),
 });
 
-export const ProvidersResponseSchema = z.object({
-  providers: z.array(z.string()),
+export const SearchByIdResponseSchema = z.object({
+  category: z.string(),
+  id: z.number().int().positive(),
+  result: MediaSearchResultSchema
+
+})
+
+export const CategoriesResponseSchema = z.object({
+  categories: z.array(z.string()),
 });
 
 export type MediaSearchResult = z.infer<typeof MediaSearchResultSchema>;
 export type SearchResponse = z.infer<typeof SearchResponseSchema>;
+export type SearchByIdResponse = z.infer<typeof SearchByIdResponseSchema>;

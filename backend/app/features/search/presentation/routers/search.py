@@ -1,28 +1,44 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 
-from app.features.search.application.interfaces.search_provider import ProviderSearchError
-from app.features.search.application.services.external_search import ExternalSearchService, UnknownProviderError
+from app.features.search.application.models import MediaType
+from app.features.search.application.services.external_search import (
+    ExternalSearchService,
+)
+from app.features.search.presentation.schemas.search import (
+    SearchResponse,
+    SearchByIDResponse,
+    CategoriesResponse,
+)
+
 from app.features.search.infrastructure.dependencies.search import get_search_service
-from app.features.search.presentation.schemas.search import SearchResponse, ProvidersResponse
 
 router = APIRouter(prefix="/search", tags=["search"])
 
-@router.get("/providers" ,response_model=ProvidersResponse)
-def providers(service: ExternalSearchService = Depends(get_search_service))-> ProvidersResponse:
 
-    return ProvidersResponse(providers=service.available_providers)
+@router.get("/categories", response_model=CategoriesResponse)
+def categories(
+    service: ExternalSearchService = Depends(get_search_service),
+) -> CategoriesResponse:
 
-@router.get("/{provider}", response_model=SearchResponse)
+    return CategoriesResponse(categories=service.available_categories)
+
+
+@router.get("/{category}", response_model=SearchResponse)
 async def search(
-    provider: str,
+    category: str,
     query: str = Query(..., min_length=1),
     service: ExternalSearchService = Depends(get_search_service),
 ) -> SearchResponse:
-    try:
-        results = await service.search(provider, query)
-    except UnknownProviderError as exception:
-        raise HTTPException(status_code=404, detail=str(exception)) from exception
-    except ProviderSearchError as exception:
-        raise HTTPException(status_code=502, detail=str(exception)) from exception
+    results = await service.search(category, query)
+    return SearchResponse(category=category, query=query, results=results)
 
-    return SearchResponse(provider=provider, query=query, results=results)
+
+@router.get("/by-id/{category}", response_model=SearchByIDResponse)
+async def search_by_id(
+    category: str,
+    id: int = Query(..., gt=0),
+    media_type: MediaType = Query(..., min_length=1),
+    service: ExternalSearchService = Depends(get_search_service),
+) -> SearchByIDResponse:
+    result = await service.search_by_id(category, id, media_type)
+    return SearchByIDResponse(category=category, id=id, result=result)

@@ -9,29 +9,29 @@ import { ResultsSkeleton } from "./results-skeleton";
 import { SearchBar } from "./search-bar";
 
 type ImportPageProps = {
-  providers: string[];
-  providersError?: string;
+  categories: string[];
+  categoriesError?: string;
 };
 
-export function ImportPage({ providers, providersError }: ImportPageProps) {
-  const [search, setSearch] = useState({ provider: "", query: "" });
+export function ImportPage({ categories, categoriesError }: ImportPageProps) {
+  const [search, setSearch] = useState({ category: "", query: "" });
 
   const { data, isLoading, isFetching, isError, error } = useSearchResults({
-    provider: search.provider,
+    category: search.category,
     query: search.query,
   });
 
   return (
     <main className="flex flex-col gap-6 px-6 py-6">
       <SearchBar
-        providers={providers}
+        categories={categories}
         isSearching={isFetching}
         onSearch={setSearch}
       />
 
-      {providersError || providers.length === 0 ? (
+      {categoriesError || categories.length === 0 ? (
         <p role="alert" className="text-sm text-destructive">
-          {providersError ?? "No search providers are available."}
+          {categoriesError ?? "No search categories are available."}
         </p>
       ) : isLoading ? (
         <ResultsSkeleton />

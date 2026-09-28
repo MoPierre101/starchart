@@ -5,6 +5,6 @@ from app.features.search.infrastructure.providers.tmdb import TMDBProvider
 def get_search_service() -> ExternalSearchService:
     return ExternalSearchService(
         {
-            "tmdb": TMDBProvider(api_key=settings.tmdb_api_key),
+            "visual_media": TMDBProvider(api_key=settings.tmdb_api_key),
         }
     )

@@ -7,18 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 type SearchBarProps = {
-  providers: string[];
+  categories: string[];
   isSearching?: boolean;
-  onSearch: (search: { provider: string; query: string }) => void;
+  onSearch: (search: { category: string; query: string }) => void;
 };
 
 export function SearchBar({
-  providers,
+  categories,
   isSearching = false,
   onSearch,
 }: SearchBarProps) {
   const [value, setValue] = useState("");
-  const [provider, setProvider] = useState(providers[0] ?? "");
+  const [category, setCategory] = useState(categories[0] ?? "");
 
   return (
     <form
@@ -26,24 +26,24 @@ export function SearchBar({
       onSubmit={(event) => {
         event.preventDefault();
         const query = value.trim();
-        if (provider && query) {
-          onSearch({ provider, query });
+        if (category && query) {
+          onSearch({ category, query });
         }
       }}
       className="flex w-full items-center gap-2"
     >
       <select
-        name="provider"
-        aria-label="Search provider"
-        value={provider}
-        onChange={(event) => setProvider(event.target.value)}
-        disabled={providers.length === 0}
+        name="category"
+        aria-label="Media category"
+        value={category}
+        onChange={(event) => setCategory(event.target.value)}
+        disabled={categories.length === 0}
         className="h-10 rounded-md border border-input bg-background px-3 text-sm"
       >
-        {providers.length === 0 && <option value="">No providers</option>}
-        {providers.map((id) => (
+        {categories.length === 0 && <option value="">No categories</option>}
+        {categories.map((id) => (
           <option key={id} value={id}>
-            {id}
+            {id === "visual_media" ? "Visual media" : id}
           </option>
         ))}
       </select>
@@ -54,12 +54,12 @@ export function SearchBar({
           name="query"
           value={value}
           onChange={(event) => setValue(event.target.value)}
-          placeholder="Search pages or external sources…"
-          aria-label="Search external sources"
+          placeholder="Search titles…"
+          aria-label="Search media"
           className="h-10 rounded-full pl-8"
         />
       </div>
-      <Button type="submit" size="lg" disabled={isSearching || !provider}>
+      <Button type="submit" size="lg" disabled={isSearching || !category}>
         {isSearching ? "Searching…" : "Search"}
       </Button>
     </form>
