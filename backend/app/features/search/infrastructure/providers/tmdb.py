@@ -15,7 +15,7 @@ class TMDBProvider:
     """SearchProvider implementation for The Movie Database."""
 
     name = "tmdb"
-    supported_media_types = (MediaType.MOVIE, MediaType.TV)
+    supported_media_types: tuple = (MediaType.MOVIE, MediaType.TV)
 
     def __init__(self, api_key: str):
         self._api_key = api_key
@@ -32,10 +32,10 @@ class TMDBProvider:
         except httpx.HTTPStatusError as exception:
             if exception.response.status_code == 404:
                 raise ProviderNotFoundError(
-                    self.name, "item not found on TMDB"
+                    self.name, "item not found on {self.name}"
                 ) from exception
             raise ProviderSearchError(
-                self.name, f"{exception.response.status_code} from TMDB"
+                self.name, f"{exception.response.status_code} from {self.name}"
             ) from exception
         except httpx.RequestError as exception:
             raise ProviderSearchError(
@@ -55,19 +55,15 @@ class TMDBProvider:
             response.raise_for_status()
             return self._normalize_api_response(response.json())
 
-    async def search_by_id(
-        self, visual_media_id: int, media_type: MediaType
-    ) -> MediaSearchResult:
+    async def search_by_id(self, id: int, media_type: MediaType) -> MediaSearchResult:
         async with self._client() as client:
             response = await client.get(
-                f"/{media_type}/{visual_media_id}", params={"language": "en-US"}
+                f"/{media_type}/{id}", params={"language": "en-US"}
             )
             response.raise_for_status()
             return self._normalize_single_item(response.json(), media_type)
 
-    async def get_episodes(
-        self, visual_media_id: int, number_of_seasons: int
-    ) -> list[dict]:
+    async def get_episodes(self, id: int, number_of_seasons: int) -> list[dict]:
         """Return episodes from each numbered season of a TV series."""
         if number_of_seasons < 0:
             raise ValueError("number_of_seasons must be non-negative")
@@ -77,7 +73,7 @@ class TMDBProvider:
         async with self._client() as client:
             for season_number in range(1, number_of_seasons + 1):
                 response = await client.get(
-                    f"/tv/{visual_media_id}/season/{season_number}",
+                    f"/tv/{id}/season/{season_number}",
                     params={"language": "en-US"},
                 )
                 response.raise_for_status()

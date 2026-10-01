@@ -12,5 +12,5 @@ class SearchProvider(Protocol):
     async def search(self, query: str) -> list[MediaSearchResult]: ...
 
     async def search_by_id(
-        self, visual_media_id: int, media_type: MediaType
+        self, id: int, media_type: MediaType
     ) -> MediaSearchResult: ...
