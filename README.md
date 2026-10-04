@@ -1,60 +1,49 @@
 # StarChart
 
-StarChart is a multi-franchise media navigation platform for finding where to start, what context matters, and where to go next across film, television, comics, and games.
+StarChart is a comics discovery app. It answers the question "which kind of story is where?"
 
-Most watch order and reading order tools present a flat sequence. StarChart adds the relational and editorial layer around that sequence. It can recommend an entry point based on a character, era, storyline, or recent viewing experience, then explain why that starting point fits and which prerequisites are important.
+Describe the story you want in plain language, such as "the story where Bane breaks Batman's back", and StarChart finds it across issues, series, eras, and collected editions. From there you can see where the story sits in its publisher's history and what to read next.
 
-> StarChart is in early development. The repository currently contains the application foundation, route structure, API surfaces, database access layer, and provider abstractions. Most product experiences described below remain on the roadmap.
+> StarChart is in early development. The repository contains Clerk sign-in, an admin dashboard shell, and a backend provider search feature. Most of the product described below is planned, not built.
 
 ## Product vision
 
 StarChart is designed to answer questions such as:
 
-* Where should I start if I care about Daredevil?
-* Which comics should I read after watching a specific film or series?
-* What did I miss while I was away from a franchise?
-* When should I leave an omnibus for a crossover and return to it?
+* Which stories match what I'm looking for?
+* Where was that story published, and which collected edition contains it?
+* Where does it sit in the publisher's history, universe, and era?
+* What comes next after the story, issue, or series I just read?
 
-The platform is built around a few core ideas:
+The core ideas:
 
-* **Entry point guidance:** Editorial starting points include the reason to begin there, the context that will be skipped, and required or optional prerequisites.
-* **Cross-franchise navigation:** Film, television, comics, and games can live in one system while retaining their franchise and continuity boundaries.
-* **Continuity-aware orders:** Timelines, reading orders, and watch orders distinguish release order, in-universe chronology, alternate continuities, and narrative dependencies.
-* **Comics onboarding:** Resource guides explain runs, series, events, issue numbering, collected editions, continuity, and reading strategies before directing new readers into an order.
-* **Media-to-comics mapping:** A film or television title can lead to comics that match its characters, tone, themes, or source material.
-* **Transparent recommendations:** Content-based suggestions explain which attributes and completed stories informed each result.
+* **Natural-language story search:** Search stories, series, and eras by what happens in them, then narrow results by publisher, universe, era, series, character, and creator.
+* **What comes next:** The next issue in the series, the next part of the story arc, the series that continues this one, and the collected edition that contains it.
+* **Reading lists and maps:** Ordered lists of series, issues, collected editions, or stories, grouped into maps with points where a reader leaves for a crossover and returns.
+* **Facts from data, judgment from people:** Story facts come from imported comics data. Opinions about what matters come from reading lists and maps made by people. No language model writes answers or catalog data.
+
+StarChart is built for a small group of readers, with three roles: administrators, moderators, and viewers.
 
 ## Planned product areas
 
 | Area | Purpose |
 | --- | --- |
-| Entry points | Route people to a suitable starting title with prerequisite and context guidance |
-| Franchises and subcategories | Organize distinct universes, adaptations, and continuity branches |
-| Timelines | Show chronological and release positions without hiding non-canon branches |
-| Reading and watch orders | Provide curated sequences with context at each step |
-| Plans | Connect several orders into a complete, trackable journey |
-| Characters and identities | Distinguish a character from aliases and multiple holders of the same identity |
-| Search | Find titles, characters, aliases, orders, and entry points using keywords or natural language |
-| Lists and progress | Track planned, active, and completed media |
-| Resources | Teach comics terminology, continuity, formats, and navigation strategies |
-| Contributions | Let community submissions enter a moderated review workflow |
+| Search | Find stories, series, and eras by description, with filters |
+| Record pages | Stories, issues, series, collected editions, eras, characters, and creators |
+| What comes next | Rule-based next steps from series, story arcs, continuations, and collected editions |
+| Reading lists and maps | Ordered lists with optional importance, grouped into longer journeys |
+| Progress | Track planned, in-progress, completed, and skipped reading |
+| Dashboard | Featured reading lists and maps from moderators |
+| Admin | Import comics, manage eras, and manage users and roles |
 
-## Rollout
+## Data
 
-Development starts with DCU Chapter One as a contained proof of concept. Its main continuity and Elseworlds titles provide enough branching complexity to validate the data model without beginning with a massive catalog.
-
-The planned expansion sequence is:
-
-1. DCU Chapter One
-2. Marvel Cinematic Universe
-3. Marvel Comics and DC Comics
-4. Star Wars, the Remedy Connected Universe, Power Rangers, Super Sentai, and other franchises
+The catalog is seeded from the [Grand Comics Database](https://www.comics.org/) data dump, limited to the publishers StarChart covers. [Metron](https://metron.cloud/) is used to search for and import material not yet in the catalog.
 
 ## Technology
 
-The current application uses:
+**Frontend (`web/`):** a Next.js 16 / React 19 app today, planned to become a React single-page application.
 
-* Next.js 16 and React 19
 * TypeScript
 * Tailwind CSS 4
 * Clerk authentication
@@ -62,56 +51,80 @@ The current application uses:
 * Zod
 * Framer Motion
 
-The AI layer is intended to remain provider agnostic, allowing local or hosted embedding and recommendation providers to be selected without coupling product logic to one vendor.
+**Backend (`backend/`):** all business rules live here so future clients can share one API.
+
+* Python 3.14+, managed with `uv`
+* FastAPI
+* SurrealDB, including vector indexes for search
+* A local embedding model for search (provisional: served through Ollama)
 
 ## Repository structure
 
 ```text
-src/
-  app/                 App Router pages, layouts, and API routes
-  components/          Shared UI and layout components
-  features/            Feature-specific components, hooks, and types
-  lib/
-    ai/                Search, embeddings, recommendations, and providers
-    db/                Database client and domain queries
-    external/          Third-party media metadata integrations
-  types/               Shared API and database types
+web/                   Frontend
+  src/
+    app/               Pages and layouts
+    components/        Shared UI and layout components
+    features/          Feature-specific components, hooks, and services
+    hooks/             Shared hooks
+    lib/               Shared utilities
+    types/             Shared API types
+backend/               FastAPI backend
+  app/
+    main.py            Creates the app and registers routers
+    features/          One folder per feature
+Notes/                 Researched engineering notes
 ```
 
 ## Local development
 
 ### Prerequisites
 
-1. Node.js compatible with Next.js 16
-2. npm
+1. Node.js compatible with Next.js 16, and npm
+2. Python 3.14+ and [uv](https://docs.astral.sh/uv/)
 3. A Clerk application
+4. A Metron account for provider search
 
-### Configuration
+### Frontend
 
-Create a `.env.local` file in the project root:
+Create `web/.env.local`:
 
 ```dotenv
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 CLERK_SECRET_KEY=
 ```
 
-### Run the app
+Then run:
 
 ```bash
+cd web
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000). Other commands: `npm run lint`, `npm run build`, `npm start`.
 
-Other available commands:
+### Backend
+
+Create `backend/.env` with the provider settings read by `backend/app/features/search/external/config.py`:
+
+```dotenv
+TMDB_BASE_URL=
+TMDB_IMAGE_BASE_URL=
+TMDB_API_KEY=
+METRON_BASE_URL=
+METRON_IMAGE_BASE_URL=
+METRON_API_KEY=
+```
+
+Then run:
 
 ```bash
-npm run lint
-npm run build
-npm start
+cd backend
+uv sync
+uv run fastapi dev app/main.py
 ```
 
 ## Project status
 
-StarChart is currently a private, early-stage project. The immediate goal is to validate the schema and interaction model with a small, real franchise dataset before expanding coverage. Features in this README describe the intended product direction and should not be interpreted as a completed release checklist.
+StarChart is a private, early-stage project. The immediate goal is to load a small, real slice of comics data and validate the data model and search before expanding coverage. Features in this README describe the intended product direction and should not be interpreted as a completed release checklist.

@@ -1,75 +1,96 @@
 # Layered vs clean architecture
 
-_2026-09-23_
+_2026-09-23, rewritten 2026-10-03_
 
-## Difference
+## The difference
 
-- Layered architecture separates responsibilities such as HTTP presentation, application behavior, and data sources. Calls and code dependencies commonly run top to bottom.
-- Clean architecture also separates responsibilities, but requires source code dependencies to point inward. Application rules define the interfaces they need; external adapters implement them; the outer application setup connects them.
-- A folder structure alone does not establish either architecture. Check imports and where business decisions live.
+- **Layered:** code is split into layers (web, app logic, outside services). Each layer calls the one below it.
+- **Clean:** same split, plus one rule: **imports point inward.** The app logic never imports the web layer or the outside-service layer. Instead, the app logic says "I need something that can do X" (an interface), and the outside layer provides it.
+- Folders alone don't make it clean. Check the imports.
 
-## StarChart backend at initial review
+## StarChart's layers (`backend/app/features/external_search/`)
 
-- Runtime request path: `routers/search.py` -> `services/external_search.py` -> `providers/tmdb.py`. `providers/base.py` declares the provider protocol and error. `main.py` registers the router.
-- This is a sensible small layered design with a provider port (`SearchProvider`) and TMDB adapter. The search service currently only dispatches to a named provider. There is no substantial domain logic or persistence layer yet.
-- It is not strict clean architecture: `services/external_search.py` imports concrete `TMDBProvider` and settings to build itself, and its protocol lives under `providers`; `providers/base.py` imports a Pydantic model from `schemas`, which is also used as the HTTP response shape; and the route imports the provider layer's error type.
-- Move provider construction into an outer composition module or FastAPI dependency when the boundary matters. Keep service code dependent on the provider protocol only. Put the normalized search result type in an application-owned module and map it to an HTTP response schema in the router if the API shape diverges.
-- Do not add empty `domain`, `repository`, or database layers solely to match a diagram. Add them when a real DCU use case or persistence need appears.
-
-## Concrete implementation points
-
-- `TMDBProvider.search` creates an `httpx.AsyncClient` for every call, so connection pooling cannot span requests. If search traffic warrants it, create one client during app lifespan, inject it into the provider, and close it on shutdown.
-- The service silently slices to `limit` before filtering unsupported media types, so it can return fewer than `limit` supported results even when later results qualify. Filter first, then apply the limit if `limit` means maximum supported results.
-- `httpx` is directly imported but absent from direct project dependencies. Declare it directly when editing dependencies.
-- Add focused tests when changing behavior: service with a fake provider, TMDB normalization with sample payloads, and route error mapping using dependency overrides.
-
-## Rule of thumb and current folder model
-
-_2026-09-23_
-
-| Layer | One question to ask | Current example |
+| Folder | One question it answers | Files |
 | --- | --- | --- |
-| Presentation | How does an HTTP request enter and leave? | `presentation/routers/search.py`, `presentation/schemas/search.py` |
-| Application | What action is the user asking the app to perform? | `application/services/external_search.py`, `application/interfaces/search_provider.py`, `application/models/search.py` |
-| Domain | What StarChart rule is true even without FastAPI, TMDB, or a database? | No domain module yet; a future prerequisite or recommendation rule would fit here. |
-| Infrastructure | How do we talk to outside systems, read settings, and connect concrete implementations? | `infrastructure/providers/tmdb.py`, `infrastructure/config.py`, `infrastructure/dependencies/search.py` |
+| `presentation/` | How does a web request come in and go out? | `router.py`, `schemas.py`, `exception_handlers.py` |
+| `application/` | What is the app being asked to do? | `service.py`, `search_provider.py`, `models.py`, `errors.py` |
+| `infrastructure/` | How do we talk to the outside world? | `metron.py` |
+| `domain/` (not created) | What StarChart rule is true no matter what? | Nothing yet. Add it when a real rule exists. |
 
-Request flow:
+Shared settings live in `backend/app/core/config.py`, not inside a feature.
+
+## Who imports whom
 
 ```text
-HTTP request
-  -> presentation router (parse request, choose HTTP response)
-  -> application service (coordinate the search use case)
-  -> infrastructure TMDB provider (make the external request)
+presentation  →  application  ←  infrastructure
 ```
 
-Code dependencies at the provider boundary: `application service -> SearchProvider interface <- TMDB provider`. The interface describes a capability; it does not execute a request. `infrastructure/dependencies/search.py` constructs the concrete provider and gives the service its provider registry. This is setup code, not search behavior. The service depends on the interface, not on `TMDBProvider`. The domain layer can be absent until there is a real StarChart rule to hold.
+- `presentation` imports `application` (the service, models, errors).
+- `infrastructure` imports `application` (the interface it fills in, models, errors).
+- `application` imports neither.
+- `main.py` is the one place allowed to import everything. It plugs the pieces together.
 
-Classify a transformation by its purpose: TMDB JSON to a common result belongs to infrastructure; a result to an HTTP response belongs to presentation; a franchise prerequisite decision belongs to domain. A `models` or `schemas` folder is a naming choice, not a layer by itself.
+## Who knows what
 
-## 2026-09-27: Provider construction and direct route calls
-
-- A `get_tmdb_provider()` function inside infrastructure is construction code and does not by itself cross a layer boundary. It can be reused by other infrastructure dependencies.
-- Importing `get_tmdb_provider()` into a presentation route is a presentation-to-infrastructure code dependency. The existing route already makes that import for `get_search_service()`. A strict inward-only dependency rule would move wiring to the app composition root, such as `main.py`, and keep the route dependent on an application service or interface.
-- A presentation route that injects `TMDBProvider` and calls its detail methods directly would also skip the application layer. Keep that route dependent on an application service when preserving the current request flow matters.
-- FastAPI supports dependencies built from other dependencies, so provider construction can be shared without exposing the concrete provider to a route.
-
-## 2026-09-27: Layer responsibilities
-
-| Layer | Knows about | Does not know about |
+| Part | Knows about | Doesn't know about |
 | --- | --- | --- |
-| Presentation | FastAPI, HTTP, and application services | TMDB, HTTPX, and API keys |
-| Application | Search rules, provider interfaces, and result models | FastAPI, HTTPX, and TMDB |
-| Infrastructure | TMDB, HTTPX, settings, and application interfaces | FastAPI routes |
-| `main.py` | The implementations needed to assemble the application | Business logic |
+| `presentation` | FastAPI, the service | Metron, httpx2, API keys |
+| `application` | What a search needs, the `SearchProvider` interface | FastAPI, Metron, httpx2 |
+| `infrastructure` | Metron, httpx2, the interface it fills in | FastAPI routes |
+| `main.py` | Everything | No logic, just setup |
 
-The source-code dependency direction is `presentation -> application` and `infrastructure -> application`. `main.py` is the outer setup point that is allowed to import and connect all three layers.
+## A request, step by step
+
+```text
+GET /external-search/series?query=batman
+  → presentation/router.py      reads the query, gets the service
+  → application/service.py      "search series for batman"
+  → infrastructure/metron.py    calls Metron, turns its JSON into a Series
+```
+
+## The interface (`application/search_provider.py`)
+
+- `SearchProvider` is a list of methods the service needs: "search series", "get series", "get issues", "get issue".
+- It doesn't call anything itself. It's a promise.
+- `MetronProvider` keeps that promise. The service only ever sees "a SearchProvider", never "Metron".
+- Why bother: in a test, hand the service a fake provider and no real Metron call happens.
+
+## Plugging it together (`main.py`)
+
+```python
+async with httpx2.AsyncClient(...) as metron_client:
+    app.state.search_service = ExternalSearchService(MetronProvider(metron_client))
+    yield
+```
+
+- At startup, `main.py` builds the Metron provider, puts it in the service, and stores the service on `app.state`.
+- The router just reads `request.app.state.search_service`. It never imports `infrastructure`.
+- See `fastapi-lifespan.md` for how `yield` works here.
+
+## Where does this code go?
+
+Ask what it's *for*:
+
+- Metron JSON → `Series` model: `infrastructure`
+- `Series` → web response: `presentation`
+- A StarChart rule (e.g. "what comes next"): `domain`
+
+A folder called `models` or `schemas` isn't a layer by itself. What matters is what the code is for.
+
+## Folder name history
+
+`presentation/application/infrastructure` → renamed to `endpoints/orchestration/external` (2026-10-01) → renamed back (2026-10-03). Same layers each time, just different names.
+
+## Still to do
+
+- Add tests: the service with a fake provider, Metron JSON → models using saved responses, and error → status code mapping.
 
 ## Sources
 
-- [Martin Fowler, Presentation Domain Data Layering](https://martinfowler.com/bliki/PresentationDomainDataLayering.html)
 - [Robert C. Martin, The Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-- [FastAPI, Bigger Applications](https://fastapi.tiangolo.com/tutorial/bigger-applications/)
-- [HTTPX, Async Support](https://www.python-httpx.org/async/)
-- [FastAPI, Sub-dependencies](https://fastapi.tiangolo.com/tutorial/dependencies/sub-dependencies/)
+- [Alistair Cockburn, Hexagonal / Ports & Adapters keynote (iSAQB, 2025)](https://conferences.isaqb.org/software-architecture-gathering/sag-2025-keynote-alistair-cockburn-the-hexagonal-or-ports-adapters-architecture/)
+- [Herberto Graça, Ports & Adapters Architecture](https://herbertograca.com/2017/09/14/ports-adapters-architecture/)
+- [Martin Fowler, Presentation Domain Data Layering](https://martinfowler.com/bliki/PresentationDomainDataLayering.html)
 - [Microsoft, Common web application architectures](https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures)
+- [FastAPI, Lifespan events](https://fastapi.tiangolo.com/advanced/events/)
+- [Starlette, Applications (app.state)](https://github.com/encode/starlette/blob/master/docs/applications.md)
