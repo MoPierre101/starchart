@@ -1,0 +1,7 @@
+{
+  "include": ["scripts"],
+  "exclude": ["**/.venv", "**/node_modules", "**/__pycache__"],
+  "extraPaths": ["scripts"],
+  "venvPath": "scripts",
+  "venv": ".venv"
+}

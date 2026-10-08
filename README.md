@@ -2,24 +2,24 @@
 
 StarChart is a comics discovery app. It answers the question "which kind of story is where?"
 
-Describe the story you want in plain language, such as "the story where Bane breaks Batman's back", and StarChart finds it across issues, series, eras, and collected editions. From there you can see where the story sits in its publisher's history and what to read next.
+Describe the story you want in plain language, such as "the story where Bane breaks Batman's back", and StarChart finds it across issues, series, and eras. From there you can see where the story sits in its publisher's history and what to read next.
 
-> StarChart is in early development. The repository contains Clerk sign-in, an admin dashboard shell, and a backend provider search feature. Most of the product described below is planned, not built.
+> StarChart is in early development. The repository contains Clerk sign-in, an admin dashboard shell, and the scripts that load comics data into SurrealDB. Most of the product described below is planned, not built.
 
 ## Product vision
 
 StarChart is designed to answer questions such as:
 
 * Which stories match what I'm looking for?
-* Where was that story published, and which collected edition contains it?
-* Where does it sit in the publisher's history, universe, and era?
+* Where was that story published?
+* Where does it sit in the publisher's history and era?
 * What comes next after the story, issue, or series I just read?
 
 The core ideas:
 
-* **Natural-language story search:** Search stories, series, and eras by what happens in them, then narrow results by publisher, universe, era, series, character, and creator.
-* **What comes next:** The next issue in the series, the next part of the story arc, the series that continues this one, and the collected edition that contains it.
-* **Reading lists and maps:** Ordered lists of series, issues, collected editions, or stories, grouped into maps with points where a reader leaves for a crossover and returns.
+* **Natural-language story search:** Search stories and eras by what happens in them, then narrow results by publisher, era, series, and creator.
+* **What comes next:** The next issue in the series, the next part of the story arc, and the series that continues this one.
+* **Reading lists and maps:** Ordered lists of series, issues, or stories, grouped into maps with points where a reader leaves for a crossover and returns.
 * **Facts from data, judgment from people:** Story facts come from imported comics data. Opinions about what matters come from reading lists and maps made by people. No language model writes answers or catalog data.
 
 StarChart is built for a small group of readers, with three roles: administrators, moderators, and viewers.
@@ -28,21 +28,21 @@ StarChart is built for a small group of readers, with three roles: administrator
 
 | Area | Purpose |
 | --- | --- |
-| Search | Find stories, series, and eras by description, with filters |
-| Record pages | Stories, issues, series, collected editions, eras, characters, and creators |
-| What comes next | Rule-based next steps from series, story arcs, continuations, and collected editions |
+| Search | Find stories and eras by description, with filters |
+| Record pages | Stories, issues, series, eras, and creators |
+| What comes next | Rule-based next steps from series, story arcs, and continuations |
 | Reading lists and maps | Ordered lists with optional importance, grouped into longer journeys |
 | Progress | Track planned, in-progress, completed, and skipped reading |
 | Dashboard | Featured reading lists and maps from moderators |
-| Admin | Import comics, manage eras, and manage users and roles |
+| Admin | Manage eras, and manage users and roles |
 
 ## Data
 
-The catalog is seeded from the [Grand Comics Database](https://www.comics.org/) data dump, limited to the publishers StarChart covers. [Metron](https://metron.cloud/) is used to search for and import material not yet in the catalog.
+The catalog is seeded from the [Grand Comics Database](https://www.comics.org/) data dump, limited to the publishers StarChart covers. Two scripts in `scripts/` (gitignored) prepare it: one cuts the full dump down to those publishers, and one cleans it and writes it into SurrealDB. New releases arrive by replacing the dump with a newer one and rerunning both.
 
 ## Technology
 
-**Frontend (`web/`):** a Next.js 16 / React 19 app today, planned to become a React single-page application.
+**App (`web/`):** a Next.js 16 / React 19 app. The plan is for its server code to read SurrealDB directly, with no separate backend service. It does not connect to SurrealDB yet.
 
 * TypeScript
 * Tailwind CSS 4
@@ -51,17 +51,17 @@ The catalog is seeded from the [Grand Comics Database](https://www.comics.org/) 
 * Zod
 * Framer Motion
 
-**Backend (`backend/`):** all business rules live here so future clients can share one API.
+**Database:** SurrealDB, including vector indexes for search. A local embedding model for search is provisional (served through Ollama).
 
-* Python 3.14+, managed with `uv`
-* FastAPI
-* SurrealDB, including vector indexes for search
-* A local embedding model for search (provisional: served through Ollama)
+**Data scripts (`scripts/`):** Python 3.14+, managed with `uv`. They are not part of the app and are not tracked in git.
+
+* `strip_gcd_dump.py` cuts the full GCD dump (`scripts/gcd_dump/dump.db`) down to the covered publishers (`scripts/gcd_dump/stripped.db`).
+* `gcd_loader` cleans the stripped dump and writes it into SurrealDB.
 
 ## Repository structure
 
 ```text
-web/                   Frontend
+web/                   Next.js app
   src/
     app/               Pages and layouts
     components/        Shared UI and layout components
@@ -69,10 +69,10 @@ web/                   Frontend
     hooks/             Shared hooks
     lib/               Shared utilities
     types/             Shared API types
-backend/               FastAPI backend
-  app/
-    main.py            Creates the app and registers routers
-    features/          One folder per feature
+scripts/               GCD dump scripts (not tracked in git)
+  strip_gcd_dump.py    Cuts the dump down to the covered publishers
+  gcd_loader/          Cleans the dump and loads it into SurrealDB
+  gcd_dump/            The GCD dump files
 Notes/                 Researched engineering notes
 ```
 
@@ -81,11 +81,11 @@ Notes/                 Researched engineering notes
 ### Prerequisites
 
 1. Node.js compatible with Next.js 16, and npm
-2. Python 3.14+ and [uv](https://docs.astral.sh/uv/)
-3. A Clerk application
-4. A Metron account for provider search
+2. A Clerk application
+3. SurrealDB, running locally
+4. Python 3.14+ and [uv](https://docs.astral.sh/uv/), only to run the data scripts
 
-### Frontend
+### App
 
 Create `web/.env.local`:
 
@@ -104,25 +104,24 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000). Other commands: `npm run lint`, `npm run build`, `npm start`.
 
-### Backend
+### Data scripts
 
-Create `backend/.env` with the provider settings read by `backend/app/features/search/external/config.py`:
+Create `scripts/.env` with the database settings:
 
 ```dotenv
-TMDB_BASE_URL=
-TMDB_IMAGE_BASE_URL=
-TMDB_API_KEY=
-METRON_BASE_URL=
-METRON_IMAGE_BASE_URL=
-METRON_API_KEY=
+SURREAL_URL=
+SURREAL_NAMESPACE=
+SURREAL_DATABASE=
+SURREAL_USERNAME=
+SURREAL_PASSWORD=
 ```
 
-Then run:
+Put the full dump downloaded from GCD at `scripts/gcd_dump/dump.db`, then run from `scripts/`:
 
 ```bash
-cd backend
 uv sync
-uv run fastapi dev app/main.py
+uv run python strip_gcd_dump.py
+uv run python -m gcd_loader
 ```
 
 ## Project status
