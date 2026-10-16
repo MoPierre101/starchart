@@ -47,6 +47,8 @@ next-env.d.ts
 **/.ruff_cache/
 
 /starchart_base_ideas
-/gcd_dump
-/scripts
+/data_dump/
+/scripts/
+/starchart/
+/supabase/
 
