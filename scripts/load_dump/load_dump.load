@@ -1,0 +1,23 @@
+-- Loads stripped.db into Postgres as it is, into the gcd_raw schema. The cleaning SQL reads gcd_raw.
+--
+-- Run it from this folder (the three braces keep mustache from changing characters in the values):
+--   STRIPPED_DB_PATH=../../data_dump/stripped.db DATABASE_URL="postgresql://user:password@host:5432/dbname" pgloader load_dump.load
+
+load database
+     from '{{{STRIPPED_DB_PATH}}}'
+     into {{{DATABASE_URL}}}
+
+ -- include drop: the tables are dropped and made again, so the load can be repeated.
+ -- on error stop: a row that fails stops the load. By default pgloader sets bad rows aside and goes on.
+ with include drop, create tables, create indexes, reset sequences, on error stop
+
+ -- search_path puts the tables in gcd_raw. The schema is created in BEFORE LOAD below.
+ set work_mem to '64MB', maintenance_work_mem to '256MB', search_path to 'gcd_raw'
+
+ -- These are added to pgloader's own casts: integer to bigint, varchar to text, decimal to numeric.
+ -- longtext is not one of the defaults. datetime(6) and datetime both become a plain timestamptz.
+ cast type longtext to text drop typemod,
+      type datetime to timestamptz drop typemod using sqlite-timestamp-to-timestamp
+
+ before load do
+ $$ create schema if not exists gcd_raw; $$;

@@ -1,0 +1,518 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["gcd"]
+}
+
+model character {
+  id                             Int                     @id
+  name                           String?
+  sort_name                      String?
+  disambiguation                 String?
+  year_first_published           Int?                    @db.SmallInt
+  year_first_published_uncertain Boolean?
+  description                    String?
+  notes                          String?
+  language_id                    Int?
+  modified                       DateTime?               @db.Timestamptz(6)
+  language                       language?               @relation(fields: [language_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  character_name_detail          character_name_detail[]
+  story_character                story_character[]
+
+  @@schema("gcd")
+}
+
+model character_name_detail {
+  id               Int        @id
+  character_id     Int?
+  name             String?
+  sort_name        String?
+  is_official_name Boolean?
+  modified         DateTime?  @db.Timestamptz(6)
+  character        character? @relation(fields: [character_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("gcd")
+}
+
+model character_role {
+  id              Int               @id
+  name            String?
+  sort_code       Int?              @db.SmallInt
+  story_character story_character[]
+
+  @@schema("gcd")
+}
+
+model country {
+  id                                        Int                 @id
+  code                                      String?
+  name                                      String?
+  creator_creator_birth_country_idTocountry creator[]           @relation("creator_birth_country_idTocountry")
+  creator_creator_death_country_idTocountry creator[]           @relation("creator_death_country_idTocountry")
+  indicia_publisher                         indicia_publisher[]
+  publisher                                 publisher[]
+  series                                    series[]
+
+  @@schema("gcd")
+}
+
+model creator {
+  id                                        Int                   @id
+  gcd_official_name                         String?
+  sort_name                                 String?
+  disambiguation                            String?
+  whos_who                                  String?
+  birth_country_id                          Int?
+  birth_country_uncertain                   Boolean?
+  birth_province                            String?
+  birth_province_uncertain                  Boolean?
+  birth_city                                String?
+  birth_city_uncertain                      Boolean?
+  birth_year                                Int?                  @db.SmallInt
+  birth_month                               Int?                  @db.SmallInt
+  birth_day                                 Int?                  @db.SmallInt
+  birth_year_uncertain                      Boolean?
+  birth_month_uncertain                     Boolean?
+  birth_day_uncertain                       Boolean?
+  death_country_id                          Int?
+  death_country_uncertain                   Boolean?
+  death_province                            String?
+  death_province_uncertain                  Boolean?
+  death_city                                String?
+  death_city_uncertain                      Boolean?
+  death_year                                Int?                  @db.SmallInt
+  death_month                               Int?                  @db.SmallInt
+  death_day                                 Int?                  @db.SmallInt
+  death_year_uncertain                      Boolean?
+  death_month_uncertain                     Boolean?
+  death_day_uncertain                       Boolean?
+  bio                                       String?
+  notes                                     String?
+  modified                                  DateTime?             @db.Timestamptz(6)
+  country_creator_birth_country_idTocountry country?              @relation("creator_birth_country_idTocountry", fields: [birth_country_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  country_creator_death_country_idTocountry country?              @relation("creator_death_country_idTocountry", fields: [death_country_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  creator_name_detail                       creator_name_detail[]
+  issue_credit                              issue_credit[]
+  story_credit                              story_credit[]
+
+  @@schema("gcd")
+}
+
+model creator_name_detail {
+  id               Int       @id
+  creator_id       Int?
+  name             String?
+  sort_name        String?
+  is_official_name Boolean?
+  family_name      String?
+  given_name       String?
+  modified         DateTime? @db.Timestamptz(6)
+  creator          creator?  @relation(fields: [creator_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("gcd")
+}
+
+model credit_type {
+  id           Int            @id
+  name         String?
+  sort_code    Int?           @db.SmallInt
+  issue_credit issue_credit[]
+  story_credit story_credit[]
+
+  @@schema("gcd")
+}
+
+model indicia_publisher {
+  id                   Int        @id
+  name                 String?
+  parent_id            Int?
+  country_id           Int?
+  year_began           Int?       @db.SmallInt
+  year_began_uncertain Boolean?
+  year_ended           Int?       @db.SmallInt
+  year_ended_uncertain Boolean?
+  is_surrogate         Boolean?
+  notes                String?
+  url                  String?
+  modified             DateTime?  @db.Timestamptz(6)
+  country              country?   @relation(fields: [country_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  publisher            publisher? @relation(fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  issue                issue[]
+
+  @@schema("gcd")
+}
+
+model issue {
+  id                                             Int                @id
+  series_id                                      Int?
+  variant_of_id                                  Int?
+  variant_cover_status                           Int?               @db.SmallInt
+  variant_name                                   String?
+  number                                         String?
+  number_sort                                    Decimal?           @db.Decimal
+  volume                                         String?
+  display_volume_with_number                     Boolean?
+  volume_not_printed                             Boolean?
+  title                                          String?
+  publication_date                               String?
+  key_year                                       Int?               @db.SmallInt
+  key_month                                      Int?               @db.SmallInt
+  key_day                                        Int?               @db.SmallInt
+  key_date_precision                             String?
+  key_sort_date                                  DateTime?          @db.Date
+  on_sale_year                                   Int?               @db.SmallInt
+  on_sale_month                                  Int?               @db.SmallInt
+  on_sale_day                                    Int?               @db.SmallInt
+  on_sale_date_precision                         String?
+  on_sale_sort_date                              DateTime?          @db.Date
+  on_sale_date_uncertain                         Boolean?
+  price_amount                                   Decimal?           @db.Decimal
+  price_currency                                 String?
+  price_text                                     String?
+  page_count                                     Decimal?           @db.Decimal(7, 3)
+  page_count_uncertain                           Boolean?
+  indicia_frequency                              String?
+  editing                                        String?
+  notes                                          String?
+  isbn                                           String?
+  isbn_text                                      String?
+  barcodes                                       String[]
+  rating                                         String?
+  rating_class                                   String?
+  indicia_publisher_id                           Int?
+  indicia_publisher_not_printed                  Boolean?
+  sort_code                                      Int?
+  is_indexed                                     Int?               @db.SmallInt
+  kind                                           String?
+  modified                                       DateTime?          @db.Timestamptz(6)
+  indicia_publisher                              indicia_publisher? @relation(fields: [indicia_publisher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  series_issue_series_idToseries                 series?            @relation("issue_series_idToseries", fields: [series_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  issue                                          issue?             @relation("issueToissue", fields: [variant_of_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_issue                                    issue[]            @relation("issueToissue")
+  issue_credit                                   issue_credit[]
+  reprint_reprint_origin_issue_idToissue         reprint[]          @relation("reprint_origin_issue_idToissue")
+  reprint_reprint_target_issue_idToissue         reprint[]          @relation("reprint_target_issue_idToissue")
+  series_series_first_issue_idToissue            series[]           @relation("series_first_issue_idToissue")
+  series_series_last_issue_idToissue             series[]           @relation("series_last_issue_idToissue")
+  series_bond_series_bond_origin_issue_idToissue series_bond[]      @relation("series_bond_origin_issue_idToissue")
+  series_bond_series_bond_target_issue_idToissue series_bond[]      @relation("series_bond_target_issue_idToissue")
+  story                                          story[]
+
+  @@index([series_id])
+  @@index([variant_of_id])
+  @@schema("gcd")
+}
+
+model issue_credit {
+  id             Int          @id
+  issue_id       Int?
+  creator_id     Int?
+  credit_type_id Int?
+  credit_name    String?
+  credited_as    String?
+  is_credited    Boolean?
+  uncertain      Boolean?
+  is_sourced     Boolean?
+  sourced_by     String?
+  modified       DateTime?    @db.Timestamptz(6)
+  creator        creator?     @relation(fields: [creator_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  credit_type    credit_type? @relation(fields: [credit_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  issue          issue?       @relation(fields: [issue_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([issue_id])
+  @@schema("gcd")
+}
+
+model language {
+  id          Int         @id
+  code        String?
+  name        String?
+  native_name String?
+  character   character[]
+  series      series[]
+  story_arc   story_arc[]
+
+  @@schema("gcd")
+}
+
+model publisher {
+  id                           Int                 @id
+  name                         String?
+  country_id                   Int?
+  year_began                   Int?                @db.SmallInt
+  year_began_uncertain         Boolean?
+  year_ended                   Int?                @db.SmallInt
+  year_ended_uncertain         Boolean?
+  year_overall_began           Int?                @db.SmallInt
+  year_overall_began_uncertain Boolean?
+  year_overall_ended           Int?                @db.SmallInt
+  year_overall_ended_uncertain Boolean?
+  notes                        String?
+  url                          String?
+  series_count                 Int?
+  issue_count                  Int?
+  modified                     DateTime?           @db.Timestamptz(6)
+  indicia_publisher            indicia_publisher[]
+  country                      country?            @relation(fields: [country_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  series                       series[]
+
+  @@schema("gcd")
+}
+
+model reprint {
+  id                                   Int       @id
+  origin_issue_id                      Int?
+  target_issue_id                      Int?
+  origin_id                            Int?
+  target_id                            Int?
+  notes                                String?
+  modified                             DateTime? @db.Timestamptz(6)
+  story_reprint_origin_idTostory       story?    @relation("reprint_origin_idTostory", fields: [origin_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  issue_reprint_origin_issue_idToissue issue?    @relation("reprint_origin_issue_idToissue", fields: [origin_issue_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  story_reprint_target_idTostory       story?    @relation("reprint_target_idTostory", fields: [target_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  issue_reprint_target_issue_idToissue issue?    @relation("reprint_target_issue_idToissue", fields: [target_issue_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([origin_issue_id])
+  @@index([target_issue_id])
+  @@schema("gcd")
+}
+
+model series {
+  id                                        Int                      @id
+  name                                      String?
+  sort_name                                 String?
+  year_began                                Int?                     @db.SmallInt
+  year_began_uncertain                      Boolean?
+  year_ended                                Int?                     @db.SmallInt
+  year_ended_uncertain                      Boolean?
+  publication_dates                         String?
+  first_issue_id                            Int?
+  last_issue_id                             Int?
+  is_current                                Boolean?
+  publisher_id                              Int?
+  country_id                                Int?
+  language_id                               Int?
+  tracking_notes                            String?
+  notes                                     String?
+  issue_count                               Int?
+  color                                     String?
+  dimensions                                String?
+  paper_stock                               String?
+  binding                                   String?
+  publishing_format                         String?
+  publication_type_id                       Int?
+  is_singleton                              Boolean?
+  modified                                  DateTime?                @db.Timestamptz(6)
+  issue_issue_series_idToseries             issue[]                  @relation("issue_series_idToseries")
+  country                                   country?                 @relation(fields: [country_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  issue_series_first_issue_idToissue        issue?                   @relation("series_first_issue_idToissue", fields: [first_issue_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  language                                  language?                @relation(fields: [language_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  issue_series_last_issue_idToissue         issue?                   @relation("series_last_issue_idToissue", fields: [last_issue_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  series_publication_type                   series_publication_type? @relation(fields: [publication_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  publisher                                 publisher?               @relation(fields: [publisher_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  series_bond_series_bond_origin_idToseries series_bond[]            @relation("series_bond_origin_idToseries")
+  series_bond_series_bond_target_idToseries series_bond[]            @relation("series_bond_target_idToseries")
+
+  @@schema("gcd")
+}
+
+model series_bond {
+  id                                       Int               @id
+  origin_id                                Int?
+  target_id                                Int?
+  origin_issue_id                          Int?
+  target_issue_id                          Int?
+  bond_type_id                             Int?
+  notes                                    String?
+  series_bond_type                         series_bond_type? @relation(fields: [bond_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  series_series_bond_origin_idToseries     series?           @relation("series_bond_origin_idToseries", fields: [origin_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  issue_series_bond_origin_issue_idToissue issue?            @relation("series_bond_origin_issue_idToissue", fields: [origin_issue_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  series_series_bond_target_idToseries     series?           @relation("series_bond_target_idToseries", fields: [target_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  issue_series_bond_target_issue_idToissue issue?            @relation("series_bond_target_issue_idToissue", fields: [target_issue_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("gcd")
+}
+
+model series_bond_type {
+  id          Int           @id
+  name        String?
+  description String?
+  notes       String?
+  series_bond series_bond[]
+
+  @@schema("gcd")
+}
+
+model series_publication_type {
+  id     Int      @id
+  name   String?
+  notes  String?
+  series series[]
+
+  @@schema("gcd")
+}
+
+model story {
+  id                               Int               @id
+  issue_id                         Int?
+  sequence_number                  Int?              @db.SmallInt
+  type_id                          Int?              @db.SmallInt
+  title                            String?
+  title_inferred                   Boolean?
+  feature                          String?
+  genres                           String[]
+  page_count                       Decimal?          @db.Decimal(7, 3)
+  page_count_uncertain             Boolean?
+  characters_text                  String?
+  synopsis                         String?
+  notes                            String?
+  reprint_notes                    String?
+  first_line                       String?
+  job_number                       String?
+  script                           String?
+  pencils                          String?
+  inks                             String?
+  colors                           String?
+  letters                          String?
+  rating_class                     String?
+  modified                         DateTime?         @db.Timestamptz(6)
+  reprint_reprint_origin_idTostory reprint[]         @relation("reprint_origin_idTostory")
+  reprint_reprint_target_idTostory reprint[]         @relation("reprint_target_idTostory")
+  issue                            issue?            @relation(fields: [issue_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  story_type                       story_type?       @relation(fields: [type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  story_character                  story_character[]
+  story_credit                     story_credit[]
+  story_story_arc                  story_story_arc[]
+  story_tag                        story_tag[]
+
+  @@index([issue_id])
+  @@schema("gcd")
+}
+
+model story_arc {
+  id                                                                 Int                  @id
+  name                                                               String?
+  sort_name                                                          String?
+  disambiguation                                                     String?
+  description                                                        String?
+  notes                                                              String?
+  language_id                                                        Int?
+  year_first_published                                               Int?                 @db.SmallInt
+  year_first_published_uncertain                                     Boolean?
+  modified                                                           DateTime?            @db.Timestamptz(6)
+  language                                                           language?            @relation(fields: [language_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  story_arc_relation_story_arc_relation_from_story_arc_idTostory_arc story_arc_relation[] @relation("story_arc_relation_from_story_arc_idTostory_arc")
+  story_arc_relation_story_arc_relation_to_story_arc_idTostory_arc   story_arc_relation[] @relation("story_arc_relation_to_story_arc_idTostory_arc")
+  story_story_arc                                                    story_story_arc[]
+
+  @@schema("gcd")
+}
+
+model story_arc_relation {
+  id                                                        Int                      @id
+  from_story_arc_id                                         Int?
+  to_story_arc_id                                           Int?
+  relation_type_id                                          Int?
+  notes                                                     String?
+  modified                                                  DateTime?                @db.Timestamptz(6)
+  story_arc_story_arc_relation_from_story_arc_idTostory_arc story_arc?               @relation("story_arc_relation_from_story_arc_idTostory_arc", fields: [from_story_arc_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  story_arc_relation_type                                   story_arc_relation_type? @relation(fields: [relation_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  story_arc_story_arc_relation_to_story_arc_idTostory_arc   story_arc?               @relation("story_arc_relation_to_story_arc_idTostory_arc", fields: [to_story_arc_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("gcd")
+}
+
+model story_arc_relation_type {
+  id                  Int                  @id
+  name                String?
+  description         String?
+  reverse_description String?
+  story_arc_relation  story_arc_relation[]
+
+  @@schema("gcd")
+}
+
+model story_character {
+  id             Int             @id
+  story_id       Int?
+  character_id   Int?
+  role_id        Int?
+  is_flashback   Boolean?
+  is_origin      Boolean?
+  is_death       Boolean?
+  notes          String?
+  modified       DateTime?       @db.Timestamptz(6)
+  character      character?      @relation(fields: [character_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  character_role character_role? @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  story          story?          @relation(fields: [story_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([character_id])
+  @@index([story_id])
+  @@schema("gcd")
+}
+
+model story_credit {
+  id             Int          @id
+  story_id       Int?
+  creator_id     Int?
+  credit_type_id Int?
+  credit_name    String?
+  credited_as    String?
+  is_credited    Boolean?
+  is_signed      Boolean?
+  signed_as      String?
+  uncertain      Boolean?
+  is_sourced     Boolean?
+  sourced_by     String?
+  modified       DateTime?    @db.Timestamptz(6)
+  creator        creator?     @relation(fields: [creator_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  credit_type    credit_type? @relation(fields: [credit_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  story          story?       @relation(fields: [story_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([creator_id])
+  @@index([story_id])
+  @@schema("gcd")
+}
+
+model story_story_arc {
+  id           Int        @id
+  story_id     Int?
+  story_arc_id Int?
+  story_arc    story_arc? @relation(fields: [story_arc_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  story        story?     @relation(fields: [story_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("gcd")
+}
+
+model story_tag {
+  story_id Int
+  tag_id   Int
+  story    story @relation(fields: [story_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tag      tag   @relation(fields: [tag_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([story_id, tag_id])
+  @@index([tag_id])
+  @@schema("gcd")
+}
+
+model story_type {
+  id        Int     @id
+  name      String?
+  sort_code Int?    @db.SmallInt
+  story     story[]
+
+  @@schema("gcd")
+}
+
+model tag {
+  id        Int         @id
+  name      String?     @unique
+  slug      String?     @unique
+  story_tag story_tag[]
+
+  @@schema("gcd")
+}

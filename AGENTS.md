@@ -11,14 +11,28 @@ Rules and conventions for AI coding agents working in this repository.
   simpler alternative, and let the user decide before writing it into code or
   the planning documents.
 * The planning documents describe intended direction, not current behavior.
-  Check the actual code (`web/src`, `scripts/`) before assuming a feature exists.
+  Check the actual code before assuming a feature exists.
 * Keep data modeling grounded in the proof-of-concept comics slice rather than
   building for every publisher up front.
 * No generative model writes answers or catalog records. A language model may
-  help write the GCD loading script, but never writes catalog records directly.
-* The app is a Next.js project in `web/`. There is no separate backend
-  service. The GCD scripts in `scripts/` are a `uv`-managed Python project; run
-  their commands from `scripts/`.
+  help write code, but never writes catalog records directly.
+
+## Code style
+
+* Prefer readable code to clever code. A reader should be able to look at a
+  function and understand what it does without a barrage of comments.
+* Any complex code gets a short comment explaining it. If the code can't be
+  summarized in one line, it is probably too complex: simplify it.
+* Use clean-code naming: names say what a thing is or does, with no
+  abbreviations.
+* Organize by feature, with one folder per feature. Don't add an abstraction
+  just because; add one only when it makes the code easier to read.
+* Constants go in their own file in the feature, and helpers go in their own
+  helpers file. The API (`api/`) is the exception: it follows Encore's docs and
+  examples. One file per area holds its endpoints, their request and response
+  types, the SQL and the small functions they use, with the tests next to it
+  (for example `search/search.ts` and `search/search.test.ts`).
+* Give each main part of a script a one-line comment.
 
 ## Planning documents
 
