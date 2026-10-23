@@ -17,7 +17,7 @@ uv run main.py
 - It reads `data_dump/gcd_dump.db`. The dump always has this name.
 - To use a different file, add its path: `uv run main.py path/to/dump.db`
 - `strip.sh` in the `scripts` folder runs this for you.
-- It writes the result to `data_dump/stripped.db`. If that file already exists, it is deleted first.
+- It writes the result to `data_dump/stripped.db`. If that file already exists, it is deleted first. On the current dump it takes about 2.5 minutes and writes a file of about 620 MB with 29 tables.
 - The original dump is never changed. It is opened read-only.
 
 ## The idea
@@ -84,7 +84,7 @@ Some notes contain GCD link markers such as `[gcd_link_issue](702)`. Many of the
 ## What it does not do
 
 - It does not clean text, null out `?`, parse dates or prices, or drop columns. The later SQL cleaning step does all of that.
-- It copies reprint story ids as they are. Some point at stories that were not kept (for example covers). The cleaning step should deal with them.
+- It copies reprint story ids as they are. Some point at stories that were not kept (for example covers). The cleaning step turns those ids into null.
 - The new tables have no foreign keys, default values or indexes. Each table is rebuilt from the source's column names and declared types (`varchar`, `datetime`, `decimal`), because pgloader uses those types later to choose Postgres types.
 
 ## Where things live
@@ -113,4 +113,4 @@ Each feature has its own folder. A `_constants` file exists only if the feature 
 
 ## Checking the result
 
-The script prints the row count of every table as it goes. Compare those numbers with the ones in `starchart/gcd_tables.md`. Those numbers were measured on the 2026-10-10 dump, so small differences are expected on a newer dump.
+The script prints the row count of every table as it goes. Compare those numbers with the ones from your previous run. Small differences are expected when the dump is newer.

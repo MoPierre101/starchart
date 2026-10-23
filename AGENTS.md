@@ -9,9 +9,8 @@ Rules and conventions for AI coding agents working in this repository.
   Discuss the approach first; don't implement unilaterally.
 * Explain each design choice in plain terms, with a concrete example and the
   simpler alternative, and let the user decide before writing it into code or
-  the planning documents.
-* The planning documents describe intended direction, not current behavior.
-  Check the actual code before assuming a feature exists.
+  documentation.
+* Check the actual code before assuming a feature exists.
 * Keep data modeling grounded in the proof-of-concept comics slice rather than
   building for every publisher up front.
 * No generative model writes answers or catalog records. A language model may
@@ -34,12 +33,10 @@ Rules and conventions for AI coding agents working in this repository.
   (for example `search/search.ts` and `search/search.test.ts`).
 * Give each main part of a script a one-line comment.
 
-## Planning documents
+## Untracked files
 
-The plan lives in `starchart_base_ideas/` (`project_starchart.md`,
-`project_starchart_tech.md`, `schema.md`, `search_schema.md`). The folder is in
-`.gitignore`, so it is **not tracked in git**: changes cannot be recovered. Get
-explicit approval before deleting or overwriting any file in it.
+Files that are not tracked in git cannot be recovered after a change. Get
+explicit approval before deleting or overwriting any untracked file.
 
 ## Evidence and sources
 

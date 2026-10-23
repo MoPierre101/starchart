@@ -40,6 +40,6 @@ The cleaning SQL expects exactly these types. It turns the 0/1 flags into boolea
 
 ## How it was tested
 
-It was run with pgloader 3.6.10 against a local Supabase database, on the stripped 2026-10-10 dump. All 29 tables and 5,271,937 rows loaded in about 11 seconds with no errors. The tables landed in `gcd_raw` (the `search_path` setting works), and the types came out as expected: `bigint`, `text`, `numeric(10,3)` and `timestamptz`, with nothing left over. The password login to the local database worked.
+It was run with pgloader 3.6.10 against Encore's local Postgres, on the stripped version of the dump in `data_dump/gcd_dump.db` (a file dated 2026-10-16). All 29 tables and 5,281,731 rows (635.1 MB) loaded in about 14 seconds with no errors. The tables landed in `gcd_raw` (the `search_path` setting works), and the cleaning step then ran on top of them without a type error.
 
-One thing to know: the local Supabase container publishes Postgres on port **54322**, not 5432, so `DATABASE_URL` must use 54322 when pgloader runs on your Mac.
+One thing to know: Encore's local Postgres is not on port 5432. Get the connection string with `encore db conn-uri starchart` and use it as `DATABASE_URL`. It carries its own port and `?sslmode=disable`.

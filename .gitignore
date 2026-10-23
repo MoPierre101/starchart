@@ -46,8 +46,6 @@ next-env.d.ts
 **/.pytest_cache/
 **/.ruff_cache/
 
-/starchart_base_ideas
 /data_dump/
 /starchart/
-/supabase/
 

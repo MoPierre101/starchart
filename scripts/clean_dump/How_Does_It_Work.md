@@ -19,6 +19,7 @@ psql "$DATABASE_URL" -f clean_dump.sql
 - Everything runs as **one transaction**. If anything fails, the database is left as it was.
 - It starts with `drop schema if exists gcd cascade`, so it can be run again.
 - It needs `gcd_raw` to exist, with the tables from `stripped.db` (including `link_target_name`).
+- It needs the `pg_trgm` extension, which an Encore migration creates.
 
 ## The idea
 
@@ -49,7 +50,7 @@ The keys come last on purpose. If any row points at something that is not there,
 The small name tables (story types, credit types, countries, languages and so on) with the right types.
 
 ### 4. `catalog/clean_catalog.sql`
-- **Issues:** cleaned text, parsed dates and prices, the rating class, the ISBN, the barcodes, and a `kind` that says single issue, collection or graphic novel.
+- **Issues:** cleaned text, parsed dates and prices, the rating class, the ISBN, the barcodes, a `kind` that says single issue, collection or graphic novel, and a `search_text` line that search matches against: series name, series start year, issue number, issue year and title, for example `Batman 2016 #50 2018 The Wedding`.
 - **Series:** cleaned text. The end year is fixed when it is impossible or missing. The first issue, last issue and issue count are worked out from the regular issues. A series with no regular issue is dropped, and so are the variants that sat in it.
 - **Publishers:** cleaned, with series and issue counts worked out here.
 - **Indicia publishers** and **series bonds.**
@@ -72,7 +73,7 @@ Reprints. A story id that was not kept becomes null.
 Story arcs, their links and relations. Tags, with tags that differ only by case merged into one.
 
 ### 11. `keys/clean_keys.sql`
-Primary keys, foreign keys, two unique tag columns, and indexes for the common joins.
+Primary keys, foreign keys, two unique tag columns, indexes for the common joins, and five trigram indexes for search: the issue `search_text`, creator names, creators' other names, character names and characters' other names.
 
 ## The rating class
 
@@ -84,7 +85,6 @@ Every issue and every story has a `rating_class`: all ages, comics code, teen, m
 
 ## What it does not do
 
-- It does not call any API.
 - It does not create the `gcd_raw` schema. pgloader does that.
 
 ## Where things live
@@ -99,7 +99,7 @@ Every issue and every story has a `rating_class`: all ages, comics code, teen, m
 | `credits/` | Credits and creators |
 | `characters/` | Characters and appearances |
 | `reprints/`, `arcs/`, `tags/` | One file each |
-| `keys/` | Keys and indexes |
+| `keys/` | Keys, join indexes and search indexes |
 
 ## Changing a rule
 
@@ -107,12 +107,14 @@ Every issue and every story has a `rating_class`: all ages, comics code, teen, m
 - **Rating classes, price, issue number, barcodes:** `catalog/clean_catalog_helpers.sql`
 - **Collection or graphic novel tag:** the `kind` column in `catalog/clean_catalog.sql`
 - **Series fixes:** the `gcd.series` part of `catalog/clean_catalog.sql`
+- **Search line:** the `search_text` column in `catalog/clean_catalog.sql`
+- **Search indexes:** the end of `keys/clean_keys.sql`
 - **Rating class for stories and the erotica rule:** `stories/clean_stories.sql`
 - **Languages kept for character text:** `characters/clean_characters.sql` (language ids 25, 27 and 34)
 
 ## How it was tested
 
-The whole pipeline was run on the 2026-10-16 dump against the local Supabase database. This step takes about a minute and ends with every primary key and all 45 foreign keys in place, so no row points at nothing.
+The whole pipeline was run on the dump in `data_dump/gcd_dump.db` (a file dated 2026-10-16) against Encore's local Postgres. This step takes about a minute and ends with 27 tables, 27 primary keys, all 45 foreign keys and the 5 trigram indexes in place, so no row points at nothing.
 
 What the test checked:
 
